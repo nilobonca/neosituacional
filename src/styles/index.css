@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+@import './fonts.css';
+
+@import './tailwind.css';
+@import './theme.css';
+
+/* React Slick Carousel Styles */
+.slick-dots {
+  bottom: -40px;
+}
+
+.slick-dots li button:before {
+  font-size: 10px;
+  color: #3b82f6;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #2563eb;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  color: #3b82f6;
+}
+
+.slick-prev {
+  left: -35px;
+}
+
+.slick-next {
+  right: -35px;
+}
+
+/* Custom styles */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.text-situational-blue {
+  color: #235487;
+}
+
+.bg-situational-blue {
+  background-color: #235487;
+}
