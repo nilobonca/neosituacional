@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, UploadCloud, FileText, X, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "../../lib/supabase";
+import { Toast } from "../components/Toast";
 
 export function Careers() {
   const [name, setName] = useState("");
@@ -138,17 +139,14 @@ export function Careers() {
         </div>
 
         <div className="p-8 md:p-12">
-          {error && (
-            <div className="mb-6 bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
+          <Toast message={error} onClose={() => setError(null)} />
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label htmlFor="name" className="block text-sm font-semibold text-gray-700">Nome Completo</label>
+                <label htmlFor="name" className="block text-sm font-semibold text-gray-700">
+                  Nome Completo <span className="text-red-500 ml-0.5">*</span>
+                </label>
                 <input
                   type="text"
                   id="name"
@@ -160,7 +158,9 @@ export function Careers() {
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700">E-mail Profissional</label>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+                  E-mail Profissional <span className="text-red-500 ml-0.5">*</span>
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -174,7 +174,9 @@ export function Careers() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="department" className="block text-sm font-semibold text-gray-700">Área de Interesse</label>
+              <label htmlFor="department" className="block text-sm font-semibold text-gray-700">
+                Área de Interesse <span className="text-red-500 ml-0.5">*</span>
+              </label>
               <select
                 id="department"
                 value={department}
@@ -192,7 +194,9 @@ export function Careers() {
             </div>
 
             <div className="space-y-2 pt-2">
-              <label className="block text-sm font-semibold text-gray-700">Anexar Currículo (PDF)</label>
+              <label className="block text-sm font-semibold text-gray-700">
+                Anexar Currículo (PDF) <span className="text-red-500 ml-0.5">*</span>
+              </label>
               
               {!file ? (
                 <div 

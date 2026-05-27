@@ -72,12 +72,6 @@ export function Home() {
                   Conheça nossos serviços
                   <ArrowRight className="h-5 w-5" />
                 </Link>
-                <Link
-                  to="/proposta"
-                  className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
-                >
-                  Solicitar Proposta
-                </Link>
               </div>
             </div>
 

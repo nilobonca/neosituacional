@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, UploadCloud, FileText, X, CheckCircle, AlertCircle, Calculator } from "lucide-react";
 import { supabase } from "../../lib/supabase";
+import { Toast } from "../components/Toast";
 
 export function Proposal() {
   // Form State
@@ -107,6 +108,11 @@ export function Proposal() {
 
     if (aptCount > 0 && (!blocks || parseInt(blocks, 10) === 0)) {
       setError("A quantidade de blocos é obrigatória e deve ser maior que zero quando há apartamentos.");
+      return false;
+    }
+
+    if (files.length !== 3) {
+      setError("Você deve anexar exatamente 3 arquivos (últimos balancetes) do condomínio.");
       return false;
     }
 
@@ -227,12 +233,7 @@ export function Proposal() {
         </div>
 
         <div className="p-8 md:p-12">
-          {error && (
-            <div className="mb-8 bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
+          <Toast message={error} onClose={() => setError(null)} />
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Sessão 1: Dados do Condomínio / Contato */}

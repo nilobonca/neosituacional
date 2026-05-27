@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { supabase } from "../../lib/supabase";
 import { Lock, Mail, AlertCircle, ArrowLeft, Building2, CheckCircle2 } from "lucide-react";
+import { Toast } from "../components/Toast";
 
 export function CondoRegister() {
   const [email, setEmail] = useState("");
@@ -65,12 +66,7 @@ export function CondoRegister() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-gray-100">
           
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-100 p-4 rounded-xl flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-700 font-medium">{error}</p>
-            </div>
-          )}
+          <Toast message={error} onClose={() => setError(null)} />
 
           {success ? (
             <div className="text-center py-4">

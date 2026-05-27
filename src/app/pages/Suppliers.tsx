@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router";
-import { ArrowLeft, UploadCloud, ImageIcon, X, CheckCircle, AlertCircle, Info, Briefcase } from "lucide-react";
+import { ArrowLeft, UploadCloud, FileText, X, CheckCircle, AlertCircle, Briefcase, Info, Image as ImageIcon } from "lucide-react";
 import { supabase } from "../../lib/supabase";
+import { Toast } from "../components/Toast";
 
 export function Suppliers() {
   // Form State
@@ -178,12 +179,7 @@ export function Suppliers() {
         </div>
 
         <div className="p-8 md:p-12">
-          {error && (
-            <div className="mb-8 bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 border border-red-100">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <p className="text-sm font-medium">{error}</p>
-            </div>
-          )}
+          <Toast message={error} onClose={() => setError(null)} />
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Sessão 1: Dados da Empresa */}
@@ -349,7 +345,7 @@ export function Suppliers() {
             <div className="pt-8 mt-8 border-t border-gray-100">
               <button
                 type="submit"
-                disabled={isSubmitting || !file}
+                disabled={isSubmitting}
                 className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isSubmitting ? (
