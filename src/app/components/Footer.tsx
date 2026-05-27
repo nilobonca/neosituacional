@@ -3,7 +3,7 @@ import { Building2, Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "l
 import { Link } from "react-router";
 import { useSiteSettings, FooterSettings } from "../hooks/useSiteSettings";
 import { useServices } from "../hooks/useServices";
-import logo from "../graphics/logo.svg";
+import logo from "../../graphics/logo.svg";
 
 export function Footer() {
   const { fetchFooterSettings } = useSiteSettings();
