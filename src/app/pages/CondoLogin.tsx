@@ -131,6 +131,13 @@ export function CondoLogin() {
                   required
                 />
               </div>
+              <div className="flex items-center justify-end mt-2">
+                <div className="text-sm">
+                  <Link to="/area-cliente/esqueci-senha" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
+                    Esqueci minha senha?
+                  </Link>
+                </div>
+              </div>
             </div>
 
             <div className="pt-2">

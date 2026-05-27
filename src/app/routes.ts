@@ -28,6 +28,8 @@ import { AdminLogin } from "./pages/AdminLogin";
 
 import { CondoLogin } from "./pages/CondoLogin";
 import { CondoRegister } from "./pages/CondoRegister";
+import { CondoForgotPassword } from "./pages/CondoForgotPassword";
+import { CondoResetPassword } from "./pages/CondoResetPassword";
 import { CondoLayout } from "./layouts/CondoLayout";
 import { CondoDashboard } from "./pages/CondoDashboard";
 import { CondoSuppliers } from "./pages/CondoSuppliers";
@@ -83,6 +85,14 @@ export const router = createBrowserRouter([
   {
     path: "/area-cliente/cadastro",
     Component: CondoRegister,
+  },
+  {
+    path: "/area-cliente/esqueci-senha",
+    Component: CondoForgotPassword,
+  },
+  {
+    path: "/area-cliente/redefinir-senha",
+    Component: CondoResetPassword,
   },
   {
     path: "/area-cliente",
