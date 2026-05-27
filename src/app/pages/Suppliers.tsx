@@ -61,8 +61,8 @@ export function Suppliers() {
       setError("Por favor, preencha todos os campos de texto obrigatórios.");
       return false;
     }
-    if (!file) {
-      setError("Por favor, anexe a logo da sua empresa.");
+    if (!competeBudgets) {
+      setError("Você deve concordar em disputar orçamentos para se cadastrar.");
       return false;
     }
     return true;
@@ -70,29 +70,35 @@ export function Suppliers() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm() || !file) return;
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const cleanName = companyName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
-      const fileName = `${Date.now()}_${cleanName}.${fileExt}`;
-      const filePath = `logos/${fileName}`;
+      let publicUrl = "";
 
-      // 1. Upload Logo
-      const { error: uploadError } = await supabase.storage
-        .from("suppliers_logos")
-        .upload(filePath, file);
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const cleanName = companyName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+        const fileName = `${Date.now()}_${cleanName}.${fileExt}`;
+        const filePath = `logos/${fileName}`;
 
-      if (uploadError) {
-        throw new Error(`Erro ao enviar o logotipo.`);
+        // 1. Upload Logo
+        const { error: uploadError } = await supabase.storage
+          .from("suppliers_logos")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw new Error(`Erro ao enviar o logotipo.`);
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from("suppliers_logos")
+          .getPublicUrl(filePath);
+          
+        publicUrl = publicUrlData.publicUrl;
       }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("suppliers_logos")
-        .getPublicUrl(filePath);
 
       // 2. Save data to database
       const { error: dbError } = await supabase
@@ -106,7 +112,7 @@ export function Suppliers() {
             common_services: commonServices,
             average_value: averageValue,
             compete_budgets: competeBudgets,
-            logo_url: publicUrlData.publicUrl,
+            logo_url: publicUrl,
             status: "new"
           }
         ]);
@@ -277,7 +283,7 @@ export function Suppliers() {
                 </div>
                 <div className="flex items-center flex-wrap gap-2">
                   <label htmlFor="competeBudgets" className="text-sm font-semibold text-gray-900 cursor-pointer select-none">
-                    Quero disputar orçamentos dos condomínios
+                    Quero disputar orçamentos dos condomínios <span className="text-red-500 ml-0.5">*</span>
                   </label>
                   <div className="relative group flex items-center justify-center">
                     <Info className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
@@ -290,7 +296,7 @@ export function Suppliers() {
               </div>
 
               <div className="space-y-4 pt-2">
-                <label className="block text-sm font-semibold text-gray-700">Pequena logo da empresa <span className="text-red-500 ml-0.5">*</span></label>
+                <label className="block text-sm font-semibold text-gray-700">Pequena logo da empresa (Opcional)</label>
                 
                 {!file ? (
                   <div 
