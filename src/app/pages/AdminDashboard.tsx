@@ -1,60 +1,89 @@
-import { LayoutDashboard, Users, FileText, ImageIcon, MessageSquare, Settings, Briefcase } from "lucide-react";
+import { 
+  FileText, 
+  ImageIcon, 
+  Users, 
+  MessageSquare, 
+  Briefcase, 
+  Settings, 
+  FileSignature, 
+  Truck,
+  ArrowRight
+} from "lucide-react";
 import { Link } from "react-router";
 
 export function AdminDashboard() {
-  const stats = [
-    { title: "Posts no Blog", value: "Gerenciar", icon: <FileText className="text-blue-500" />, link: "/admin/blog" },
-    { title: "Carrossel Home", value: "Gerenciar", icon: <ImageIcon className="text-purple-500" />, link: "/admin/carousel" },
-    { title: "Clientes & Parceiros", value: "Gerenciar", icon: <Users className="text-green-500" />, link: "/admin/clients" },
-    { title: "Depoimentos", value: "Gerenciar", icon: <MessageSquare className="text-orange-500" />, link: "/admin/testimonials" },
-    { title: "Serviços", value: "Gerenciar", icon: <Briefcase className="text-indigo-500" />, link: "/admin/services" },
+  const sections = [
+    {
+      title: "Comercial & Atendimento",
+      description: "Gerencie as solicitações recebidas pelo site",
+      items: [
+        { title: "Propostas de Condomínios", description: "Orçamentos solicitados via formulário", icon: <FileSignature className="text-blue-500" size={24} />, link: "/admin/proposals", bgColor: "bg-blue-50" },
+        { title: "Currículos Recebidos", description: "Candidatos para vagas e banco de talentos", icon: <Briefcase className="text-indigo-500" size={24} />, link: "/admin/careers", bgColor: "bg-indigo-50" },
+        { title: "Rede de Fornecedores", description: "Prestadores de serviço e parcerias", icon: <Truck className="text-emerald-500" size={24} />, link: "/admin/suppliers", bgColor: "bg-emerald-50" },
+      ]
+    },
+    {
+      title: "Conteúdo do Site",
+      description: "Atualize os textos, imagens e seções da página principal",
+      items: [
+        { title: "Artigos do Blog", description: "Conteúdo técnico e notícias", icon: <FileText className="text-orange-500" size={24} />, link: "/admin/blog", bgColor: "bg-orange-50" },
+        { title: "Carrossel Home", description: "Banners de destaque da página inicial", icon: <ImageIcon className="text-purple-500" size={24} />, link: "/admin/carousel", bgColor: "bg-purple-50" },
+        { title: "Clientes & Parceiros", description: "Logos exibidas na vitrine de clientes", icon: <Users className="text-pink-500" size={24} />, link: "/admin/clients", bgColor: "bg-pink-50" },
+        { title: "Depoimentos", description: "Feedbacks em destaque", icon: <MessageSquare className="text-yellow-500" size={24} />, link: "/admin/testimonials", bgColor: "bg-yellow-50" },
+        { title: "Nossos Serviços", description: "Página de serviços oferecidos", icon: <Briefcase className="text-teal-500" size={24} />, link: "/admin/services", bgColor: "bg-teal-50" },
+      ]
+    },
+    {
+      title: "Sistema",
+      description: "Ajustes globais e informações gerais do sistema",
+      items: [
+        { title: "Configurações Gerais", description: "Rodapé, contatos e informações básicas", icon: <Settings className="text-slate-500" size={24} />, link: "/admin/settings", bgColor: "bg-slate-100" },
+      ]
+    }
   ];
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Painel de Controle</h1>
-        <p className="text-slate-500">
-          Bem-vindo à área de administração do Site Situacional. O que você gostaria de gerenciar hoje?
+    <div className="max-w-6xl mx-auto space-y-10">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">Dashboard Geral</h1>
+        <p className="text-slate-500 text-lg">
+          Bem-vindo ao painel de administração da Situacional. Selecione uma das opções abaixo para gerenciar.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, i) => (
-          <Link 
-            key={i} 
-            to={stat.link}
-            className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col group"
-          >
-            <div className="w-12 h-12 rounded-lg bg-slate-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              {stat.icon}
-            </div>
-            <h3 className="text-slate-500 font-medium text-sm mb-1">{stat.title}</h3>
-            <span className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              {stat.value}
-              <span className="text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity text-sm ml-auto">
-                Abrir &rarr;
-              </span>
-            </span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <Settings className="text-slate-400" />
-          <h2 className="text-lg font-bold text-slate-900">Configurações Rápidas</h2>
+      {sections.map((section, idx) => (
+        <div key={idx} className="space-y-4">
+          <div className="border-b border-slate-200 pb-2">
+            <h2 className="text-xl font-bold text-slate-800">{section.title}</h2>
+            <p className="text-slate-500 text-sm">{section.description}</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {section.items.map((item, i) => (
+              <Link 
+                key={i} 
+                to={item.link}
+                className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex items-start gap-4 group"
+              >
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform ${item.bgColor}`}>
+                  {item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-slate-800 font-semibold text-base mb-1 group-hover:text-blue-600 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-snug">
+                    {item.description}
+                  </p>
+                  <div className="mt-3 flex items-center gap-1 text-sm font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity transform -translate-x-2 group-hover:translate-x-0">
+                    Acessar <ArrowRight size={16} />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-        <p className="text-slate-500 text-sm mb-4 max-w-2xl">
-          Nesta área você pode ajustar as informações globais do site, como os telefones de contato, endereço e e-mail que aparecem no rodapé de todas as páginas.
-        </p>
-        <Link 
-          to="/admin/settings"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-sm font-medium transition-colors"
-        >
-          Editar Rodapé (Footer)
-        </Link>
-      </div>
+      ))}
     </div>
   );
 }

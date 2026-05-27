@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Building2, Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router";
 import { useSiteSettings, FooterSettings } from "../hooks/useSiteSettings";
+import { useServices } from "../hooks/useServices";
 
 export function Footer() {
   const { fetchFooterSettings } = useSiteSettings();
+  const { services, fetchServices } = useServices();
   const [settings, setSettings] = useState<FooterSettings>({
     address: "Av. Paulista, 1000 - São Paulo, SP",
     phone: "(11) 3456-7890",
@@ -24,6 +26,10 @@ export function Footer() {
     }
     loadSettings();
   }, [fetchFooterSettings]);
+
+  useEffect(() => {
+    fetchServices(true);
+  }, [fetchServices]);
 
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -91,10 +97,16 @@ export function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Serviços</h3>
             <ul className="space-y-2 text-sm">
-              <li>Gestão Financeira</li>
-              <li>Assessoria Jurídica</li>
-              <li>Manutenção e Obras</li>
-              <li>Portal Digital</li>
+              {services.slice(0, 4).map(service => (
+                <li key={service.id}>
+                  <Link to="/servicos" className="hover:text-blue-500 transition-colors">
+                    {service.title}
+                  </Link>
+                </li>
+              ))}
+              {services.length === 0 && (
+                <li className="text-gray-500 italic font-mono text-xs">...</li>
+              )}
             </ul>
           </div>
 

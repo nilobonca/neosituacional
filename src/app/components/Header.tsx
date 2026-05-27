@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { Building2, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
@@ -45,25 +45,40 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            
+
+
             <Link
-              to="/area-cliente"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+              to="/area-cliente/login"
+              className="bg-slate-100 text-slate-800 border border-slate-200 px-4 py-2 rounded-lg text-sm hover:bg-slate-200 font-medium transition-colors"
+            >
+              Login Síndico
+            </Link>
+            <a
+              href="https://situacional.superlogica.net/clients/areadocondomino"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium transition-colors"
             >
               Área do Cliente
-            </Link>
+            </a>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6 text-gray-600" />
-            ) : (
-              <Menu className="h-6 w-6 text-gray-600" />
-            )}
-          </button>
+          {/* Mobile Actions */}
+          <div className="flex items-center gap-2 md:hidden">
+
+            {/* Mobile Menu Button */}
+            <button
+              className="p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6 text-gray-600" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-600" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -84,12 +99,21 @@ export function Header() {
                 </Link>
               ))}
               <Link
-                to="/area-cliente"
+                to="/area-cliente/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors text-center"
+                className="bg-slate-100 text-slate-800 border border-slate-200 px-4 py-2 rounded-lg text-sm hover:bg-slate-200 font-medium transition-colors text-center"
+              >
+                Login Síndico
+              </Link>
+              <a
+                href="https://situacional.superlogica.net/clients/areadocondomino"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium transition-colors text-center"
               >
                 Área do Cliente
-              </Link>
+              </a>
             </div>
           </nav>
         )}

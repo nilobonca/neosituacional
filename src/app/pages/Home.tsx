@@ -4,8 +4,9 @@ import { BlogCarousel } from "../components/BlogCarousel";
 import { useBlogPosts } from "../hooks/useBlogPosts";
 import { Link } from "react-router";
 import { supabase } from "../../lib/supabase";
-import { motion } from "framer-motion";
+
 import { useSiteSettings, HomeBanners } from "../hooks/useSiteSettings";
+import { HelpSelectionForm } from "../components/HelpSelectionForm";
 
 export function Home() {
   const { posts, loading: loadingPosts, fetchPosts } = useBlogPosts();
@@ -52,29 +53,39 @@ export function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
+      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {banners.heroTitle}
-            </h1>
-            <p className="text-xl mb-8 text-blue-100">
-              {banners.heroSubtitle}
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                to="/servicos"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
-              >
-                Conheça nossos serviços
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link
-                to="/contatos"
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
-              >
-                Fale conosco
-              </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Column: Hero Content */}
+            <div className="lg:col-span-7">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                {banners.heroTitle}
+              </h1>
+              <p className="text-xl mb-8 text-blue-100 leading-relaxed">
+                {banners.heroSubtitle}
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  to="/servicos"
+                  className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2 shadow-md"
+                >
+                  Conheça nossos serviços
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+                <Link
+                  to="/contatos"
+                  className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+                >
+                  Fale conosco
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Column: Interactive Help Selection Form */}
+            <div className="lg:col-span-5 w-full">
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl text-gray-900 border border-white/20">
+                <HelpSelectionForm compact={true} />
+              </div>
             </div>
           </div>
         </div>
@@ -125,41 +136,9 @@ export function Home() {
               <div className="text-center text-gray-400 italic py-8">
                 Nenhum parceiro adicionado ainda...
               </div>
-            ) : activeClients.length > 4 ? (
-              // Modo Carrossel Automático (Marquee)
-              <div className="relative w-full overflow-hidden flex inset-0">
-                <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-                
-                <motion.div 
-                  className="flex gap-12 whitespace-nowrap pl-4 items-center"
-                  animate={{ x: ["0%", "-50%"] }}
-                  transition={{ ease: "linear", duration: 25, repeat: Infinity }}
-                >
-                  {[...activeClients, ...activeClients].map((client, idx) => {
-                    const CardComponent = client.website_url ? 'a' : 'div';
-                    const linkProps = client.website_url ? { href: client.website_url, target: "_blank", rel: "noopener noreferrer" } : {};
-                    
-                    return (
-                      <CardComponent
-                        key={`${client.id}-${idx}`}
-                        {...linkProps}
-                        className={`flex-shrink-0 flex flex-col items-center justify-center p-6 w-48 transition-transform ${client.website_url ? "hover:scale-105 cursor-pointer" : "cursor-default"}`}
-                      >
-                        <div className="h-20 w-full flex items-center justify-center mb-3">
-                          <img src={client.logo_url} alt={client.name} className="max-h-full max-w-full object-contain mix-blend-multiply transition-all duration-300" />
-                        </div>
-                        <p className="text-sm text-gray-700 text-center font-medium transition-opacity">
-                          {client.name}
-                        </p>
-                      </CardComponent>
-                    );
-                  })}
-                </motion.div>
-              </div>
             ) : (
-              // Modo Grid Normal (Até 4 parceiros)
-              <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center">
+              // Modo Grid Normal sem animação
+              <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center py-8">
                 {activeClients.map((client) => {
                   const CardComponent = client.website_url ? 'a' : 'div';
                   const linkProps = client.website_url ? { href: client.website_url, target: "_blank", rel: "noopener noreferrer" } : {};
