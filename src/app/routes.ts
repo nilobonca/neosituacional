@@ -5,7 +5,6 @@ import { Blog } from "./pages/Blog";
 import { BlogPost } from "./pages/BlogPost";
 import { Services } from "./pages/Services";
 import { About } from "./pages/About";
-import { Contact } from "./pages/Contact";
 import { Feedback } from "./pages/Feedback";
 import { ClientArea } from "./pages/ClientArea";
 import { NotFound } from "./pages/NotFound";
@@ -43,7 +42,6 @@ export const router = createBrowserRouter([
       { path: "blog/:id", Component: BlogPost },
       { path: "servicos", Component: Services },
       { path: "quem-somos", Component: About },
-      { path: "contatos", Component: Contact },
       { path: "feedback", Component: Feedback },
       { path: "area-cliente", Component: ClientArea },
       

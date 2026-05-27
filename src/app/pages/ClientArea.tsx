@@ -99,9 +99,9 @@ export function ClientArea() {
 
             <div className="mt-6 pt-6 border-t text-center">
               <p className="text-sm text-gray-600">
-                Não tem acesso?{" "}
-                <a href="/contatos" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Entre em contato
+                Ainda não é nosso cliente?{" "}
+                <a href="/proposta" className="text-blue-600 hover:text-blue-700 font-medium">
+                  Solicite uma proposta
                 </a>
               </p>
             </div>

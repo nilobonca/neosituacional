@@ -12,7 +12,6 @@ export function Header() {
     { path: "/blog", label: "Blog" },
     { path: "/servicos", label: "Serviços" },
     { path: "/quem-somos", label: "Quem Somos" },
-    { path: "/contatos", label: "Contatos" },
     { path: "/feedback", label: "Feedbacks" },
   ];
 
