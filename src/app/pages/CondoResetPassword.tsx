@@ -46,9 +46,12 @@ export function CondoResetPassword() {
     if (updateError) {
       setError("Erro ao redefinir a senha: " + updateError.message);
     } else {
+      // Opcional: fazer logout do usuário logo após a redefinição de senha para forçá-lo a logar com a nova
+      await supabase.auth.signOut();
+      
       setSuccess(true);
       setTimeout(() => {
-        navigate("/area-cliente");
+        navigate("/area-cliente/login");
       }, 3000);
     }
     
@@ -84,7 +87,7 @@ export function CondoResetPassword() {
                 Senha atualizada!
               </h3>
               <p className="mt-2 text-sm text-gray-500 mb-6">
-                Sua senha foi redefinida com sucesso. Redirecionando você para o painel...
+                Sua senha foi redefinida com sucesso. Redirecionando você para o login...
               </p>
             </div>
           ) : (
