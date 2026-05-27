@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { supabase } from "../../lib/supabase";
+import logo from "../../graphics/logo.svg";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -99,7 +100,7 @@ export function AdminLayout() {
       {/* Mobile Header (replaces sidebar on small screens) */}
       <div className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
         <Link to="/admin" className="flex items-center gap-2">
-          <img src="/src/graphics/logo.svg" alt="Logo" className="h-6 w-auto bg-white rounded p-0.5" />
+          <img src={logo} alt="Logo" className="h-6 w-auto bg-white rounded p-0.5" />
           <span className="font-montserrat font-bold text-lg">SITUACIONAL Admin</span>
         </Link>
         <button onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -115,7 +116,7 @@ export function AdminLayout() {
       >
         <div className="p-6 hidden md:block border-b border-slate-800">
           <Link to="/admin" className="flex items-center gap-2" title="Ir para o Dashboard">
-            <img src="/src/graphics/logo.svg" alt="SITUACIONAL Logo" className="h-8 w-auto bg-white rounded p-1" />
+            <img src={logo} alt="SITUACIONAL Logo" className="h-8 w-auto bg-white rounded p-1" />
             <span className="font-montserrat font-bold text-lg tracking-wider">
               ADMIN
             </span>

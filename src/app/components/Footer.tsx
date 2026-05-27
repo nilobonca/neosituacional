@@ -3,6 +3,7 @@ import { Building2, Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "l
 import { Link } from "react-router";
 import { useSiteSettings, FooterSettings } from "../hooks/useSiteSettings";
 import { useServices } from "../hooks/useServices";
+import logo from "../graphics/logo.svg";
 
 export function Footer() {
   const { fetchFooterSettings } = useSiteSettings();
@@ -38,7 +39,9 @@ export function Footer() {
           {/* Logo e Descrição */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src="/src/graphics/logo.svg" alt="SITUACIONAL Logo" className="h-10 w-auto brightness-0 invert" />
+              <Link to="/" className="inline-block">
+                <img src={logo} alt="SITUACIONAL Logo" className="h-10 w-auto brightness-0 invert" />
+              </Link>
               <span className="font-bold text-xl text-white font-montserrat">
                 SITUACIONAL
               </span>

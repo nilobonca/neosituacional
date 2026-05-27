@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import logo from "../../graphics/logo.svg";
 
 export function Header() {
   const location = useLocation();
@@ -25,7 +26,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/src/graphics/logo.svg" alt="SITUACIONAL Logo" className="h-10 w-auto" />
+            <img src={logo} alt="SITUACIONAL Logo" className="h-10 w-auto" />
             <span className="font-bold text-xl text-situational-blue font-montserrat">
               SITUACIONAL
             </span>
