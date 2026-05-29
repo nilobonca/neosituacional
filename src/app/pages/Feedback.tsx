@@ -5,17 +5,33 @@ import { supabase } from "../../lib/supabase";
 export function Feedback() {
   const [formData, setFormData] = useState({
     name: "",
-    condominium: "",
+    condominium_id: "",
     rating: 5,
     text: ""
   });
   const [submitted, setSubmitted] = useState(false);
   const [activeTestimonials, setActiveTestimonials] = useState<any[]>([]);
+  const [condominiums, setCondominiums] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTestimonials();
+    fetchCondominiums();
   }, []);
+
+  const fetchCondominiums = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("condominiums")
+        .select("id, name")
+        .eq("active", true)
+        .order("name", { ascending: true });
+      if (!error && data) setCondominiums(data);
+    } catch (err) {
+      console.error("Erro ao buscar condomínios:", err);
+    }
+  };
 
   const fetchTestimonials = async () => {
     try {
@@ -35,19 +51,39 @@ export function Feedback() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui seria enviado o formulário para o backend
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        name: "",
-        condominium: "",
-        rating: 5,
-        text: ""
-      });
-    }, 3000);
+    if (!formData.condominium_id) {
+      setError("Por favor, selecione seu condomínio.");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("testimonials").insert([{
+        name: formData.name,
+        condominium_id: formData.condominium_id,
+        content: formData.text,
+        show_on_home: false
+      }]);
+
+      if (error) throw error;
+      
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          name: "",
+          condominium_id: "",
+          rating: 5,
+          text: ""
+        });
+      }, 4000);
+    } catch (err: any) {
+      setError("Erro ao enviar feedback: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -136,11 +172,17 @@ export function Feedback() {
                 Deixe seu Feedback
               </h2>
 
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
+
               {submitted ? (
                 <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
                   <p className="font-semibold">Obrigado pelo feedback!</p>
                   <p className="text-sm mt-1">
-                    Sua opinião é muito importante para nós.
+                    Sua opinião foi enviada com sucesso.
                   </p>
                 </div>
               ) : (
@@ -170,15 +212,19 @@ export function Feedback() {
                     >
                       Condomínio *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       id="condominium"
-                      name="condominium"
+                      name="condominium_id"
                       required
-                      value={formData.condominium}
+                      value={formData.condominium_id}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="" disabled>Selecione o condomínio</option>
+                      {condominiums.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>

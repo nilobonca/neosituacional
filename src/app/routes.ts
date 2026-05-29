@@ -19,6 +19,7 @@ import { AdminLayout } from "./layouts/AdminLayout";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminClients } from "./pages/AdminClients";
 import { AdminTestimonials } from "./pages/AdminTestimonials";
+import { AdminCondominiums } from "./pages/AdminCondominiums";
 import { AdminSettings } from "./pages/AdminSettings";
 import { AdminServices } from "./pages/AdminServices";
 import { AdminCareers } from "./pages/AdminCareers";
@@ -70,7 +71,14 @@ export const router = createBrowserRouter([
       { path: "clients", Component: AdminClients },
       { path: "services", Component: AdminServices },
       { path: "testimonials", Component: AdminTestimonials },
-      { path: "settings", Component: AdminSettings },
+      {
+        path: "condominiums",
+        Component: AdminCondominiums,
+      },
+      {
+        path: "settings",
+        Component: AdminSettings,
+      },
       { path: "carousel", Component: AdminSettings },
       { path: "careers", Component: AdminCareers },
       { path: "proposals", Component: AdminProposals },

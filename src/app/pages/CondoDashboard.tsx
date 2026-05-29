@@ -1,7 +1,33 @@
-import { Building2, Truck, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Truck, FileText, MessageSquare } from "lucide-react";
 import { Link } from "react-router";
+import { supabase } from "../../lib/supabase";
 
 export function CondoDashboard() {
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
+
+  useEffect(() => {
+    fetchFeedbacks();
+  }, []);
+
+  const fetchFeedbacks = async () => {
+    try {
+      // O RLS já restringe para buscar apenas os feedbacks que pertencem ao condomínio deste síndico
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setFeedbacks(data || []);
+    } catch (err) {
+      console.error("Erro ao buscar feedbacks:", err);
+    } finally {
+      setLoadingFeedbacks(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -49,6 +75,52 @@ export function CondoDashboard() {
             Em breve você poderá acessar os documentos do seu condomínio por aqui.
           </p>
         </div>
+      </div>
+
+      <div className="mt-12">
+        <h2 className="text-xl font-bold font-montserrat text-gray-900 mb-6 flex items-center gap-2">
+          <MessageSquare className="h-6 w-6 text-blue-600" /> 
+          Feedbacks do Condomínio
+        </h2>
+
+        {loadingFeedbacks ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : feedbacks.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-500 shadow-sm">
+            Nenhum feedback recebido ainda.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {feedbacks.map((f) => (
+              <div key={f.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col">
+                <div className="flex items-center gap-4 mb-4">
+                  {f.avatar_url ? (
+                    <img src={f.avatar_url} className="w-12 h-12 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl">
+                      {f.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-bold text-gray-900 leading-tight">{f.name}</p>
+                    <p className="text-sm text-gray-500">{new Date(f.created_at).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 italic flex-1">"{f.content}"</p>
+                <div className="mt-4 pt-4 border-t flex justify-between items-center text-sm text-gray-500">
+                  <span className="text-yellow-500 font-medium">Avaliação 5/5 ⭐</span>
+                  {f.show_on_home ? (
+                    <span className="text-green-600 font-medium">Público no Site</span>
+                  ) : (
+                    <span className="text-orange-500 font-medium">Em Análise pelo Admin</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

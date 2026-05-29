@@ -1,17 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
 import { supabase } from "../../lib/supabase";
-import { Lock, Mail, AlertCircle, ArrowLeft, Building2, CheckCircle2 } from "lucide-react";
+import { Lock, Mail, Building2, CheckCircle2 } from "lucide-react";
 import { Toast } from "../components/Toast";
 
 export function CondoRegister() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [condominiumId, setCondominiumId] = useState("");
+  const [condos, setCondos] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchCondos();
+  }, []);
+
+  const fetchCondos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("condominiums")
+        .select("id, name")
+        .eq("active", true)
+        .order("name", { ascending: true });
+      if (!error && data) {
+        setCondos(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +51,20 @@ export function CondoRegister() {
       return;
     }
 
+    if (!condominiumId) {
+      setError("Selecione o condomínio.");
+      setLoading(false);
+      return;
+    }
+
     const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          condominium_id: condominiumId
+        }
+      }
     });
 
     if (authError) {
@@ -107,6 +139,26 @@ export function CondoRegister() {
                     placeholder="sindico@condominio.com.br"
                     required
                   />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Condomínio</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Building2 className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <select
+                    value={condominiumId}
+                    onChange={(e) => setCondominiumId(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all appearance-none"
+                    required
+                  >
+                    <option value="" disabled>Selecione seu Condomínio</option>
+                    {condos.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

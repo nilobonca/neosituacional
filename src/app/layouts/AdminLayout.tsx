@@ -83,6 +83,7 @@ export function AdminLayout() {
     { path: "/admin/careers", icon: <Briefcase size={20} />, label: "Currículos" },
     { path: "/admin/proposals", icon: <FileSignature size={20} />, label: "Propostas" },
     { path: "/admin/suppliers", icon: <Truck size={20} />, label: "Fornecedores" },
+    { path: "/admin/condominiums", icon: <Building2 size={20} />, label: "Condomínios" },
     { path: "/admin/blog", icon: <FileText size={20} />, label: "Blog" },
     { path: "/admin/carousel", icon: <ImageIcon size={20} />, label: "Carrossel" },
     { path: "/admin/clients", icon: <Users size={20} />, label: "Clientes & Parceiros" },
