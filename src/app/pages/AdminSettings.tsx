@@ -9,14 +9,15 @@ export function AdminSettings() {
   const [error, setError] = useState("");
   const [showImagePicker, setShowImagePicker] = useState(false);
 
-  // Footer state
   const [footerSettings, setFooterSettings] = useState({
     address: "",
     phone: "",
+    phones: [] as string[],
     email: "",
     facebook: "",
     instagram: "",
-    linkedin: ""
+    linkedin: "",
+    showContactInfo: true
   });
 
   // Carousel state
@@ -43,7 +44,11 @@ export function AdminSettings() {
       if (data) {
         const footerInfo = data.find(d => d.key === "footer");
         if (footerInfo && footerInfo.value) {
-          setFooterSettings(footerInfo.value);
+          setFooterSettings({
+            ...footerInfo.value,
+            showContactInfo: footerInfo.value.showContactInfo !== false,
+            phones: footerInfo.value.phones || (footerInfo.value.phone ? [footerInfo.value.phone] : [])
+          });
         }
 
         const carouselInfo = data.find(d => d.key === "carousel");
@@ -185,23 +190,72 @@ export function AdminSettings() {
 
       {/* SESSÃO FOOTER */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">2. Informações de Contato (Rodapé e Header)</h2>
-          <p className="text-sm text-gray-500">Mude esses valores para atualizar todo o site.</p>
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">2. Informações de Contato (Rodapé e Header)</h2>
+            <p className="text-sm text-gray-500">Mude esses valores para atualizar todo o site.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700">Exibir Contatos no Site</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={footerSettings.showContactInfo} onChange={e => setFooterSettings({...footerSettings, showContactInfo: e.target.checked})} />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
         </div>
         <div className="p-6">
           <form onSubmit={handleSaveFooter} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Endereço Principal</label>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-gray-700">Endereço Principal</label>
+                  <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600">
+                    <input type="checkbox" checked={footerSettings.showAddress !== false} onChange={e => setFooterSettings({...footerSettings, showAddress: e.target.checked})} className="rounded text-blue-600 focus:ring-blue-500" />
+                    <span>Exibir</span>
+                  </label>
+                </div>
                 <input type="text" value={footerSettings.address} onChange={e => setFooterSettings({...footerSettings, address: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-blue-600" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone / WhatsApp</label>
-                <input type="text" value={footerSettings.phone} onChange={e => setFooterSettings({...footerSettings, phone: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-blue-600" />
+              <div className="md:row-span-2">
+                <div className="flex justify-between items-center mb-1">
+                  <div className="flex items-center gap-3">
+                    <label className="block text-sm font-medium text-gray-700">Telefones / WhatsApp</label>
+                    <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600">
+                      <input type="checkbox" checked={footerSettings.showPhones !== false} onChange={e => setFooterSettings({...footerSettings, showPhones: e.target.checked})} className="rounded text-blue-600 focus:ring-blue-500" />
+                      <span>Exibir</span>
+                    </label>
+                  </div>
+                  <button type="button" onClick={() => setFooterSettings({...footerSettings, phones: [...(footerSettings.phones || []), ""]})} className="text-sm text-blue-600 hover:text-blue-800 font-medium">+ Adicionar</button>
+                </div>
+                <div className="space-y-2">
+                  {(footerSettings.phones || []).map((phone, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input type="text" value={phone} onChange={e => {
+                        const newPhones = [...footerSettings.phones];
+                        newPhones[idx] = e.target.value;
+                        setFooterSettings({...footerSettings, phones: newPhones});
+                      }} className="w-full px-3 py-2 border rounded-lg focus:ring-blue-600" placeholder="(00) 00000-0000" />
+                      <button type="button" onClick={() => {
+                        const newPhones = footerSettings.phones.filter((_, i) => i !== idx);
+                        setFooterSettings({...footerSettings, phones: newPhones});
+                      }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg border border-red-100">
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  ))}
+                  {(!footerSettings.phones || footerSettings.phones.length === 0) && (
+                    <p className="text-sm text-gray-500 italic py-2">Nenhum telefone cadastrado.</p>
+                  )}
+                </div>
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail Comercial</label>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-gray-700">E-mail Comercial</label>
+                  <label className="flex items-center gap-1.5 cursor-pointer text-sm text-gray-600">
+                    <input type="checkbox" checked={footerSettings.showEmail !== false} onChange={e => setFooterSettings({...footerSettings, showEmail: e.target.checked})} className="rounded text-blue-600 focus:ring-blue-500" />
+                    <span>Exibir</span>
+                  </label>
+                </div>
                 <input type="email" value={footerSettings.email} onChange={e => setFooterSettings({...footerSettings, email: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-blue-600" />
               </div>
               

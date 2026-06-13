@@ -114,31 +114,44 @@ export function Footer() {
           </div>
 
           {/* Contato */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Contato</h3>
-            <ul className="space-y-3">
-              {settings.phone && (
-                <li className="flex items-start gap-2 text-sm">
-                  <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>{settings.phone}</span>
-                </li>
-              )}
-              {settings.email && (
-                <li className="flex items-start gap-2 text-sm">
-                  <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <a href={`mailto:${settings.email}`} className="hover:text-blue-500 transition-colors">
-                    {settings.email}
-                  </a>
-                </li>
-              )}
-              {settings.address && (
-                <li className="flex items-start gap-2 text-sm">
-                  <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>{settings.address}</span>
-                </li>
-              )}
-            </ul>
-          </div>
+          {settings.showContactInfo !== false && (
+            <div>
+              <h3 className="text-white font-semibold mb-4">Contato</h3>
+              <ul className="space-y-3">
+                {settings.showPhones !== false && (settings.phones && settings.phones.length > 0 ? (
+                  settings.phones.map((phone, idx) => (
+                    phone.trim() && (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span>{phone}</span>
+                      </li>
+                    )
+                  ))
+                ) : (
+                  settings.phone && (
+                    <li className="flex items-start gap-2 text-sm">
+                      <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <span>{settings.phone}</span>
+                    </li>
+                  )
+                ))}
+                {settings.showEmail !== false && settings.email && (
+                  <li className="flex items-start gap-2 text-sm">
+                    <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <a href={`mailto:${settings.email}`} className="hover:text-blue-500 transition-colors">
+                      {settings.email}
+                    </a>
+                  </li>
+                )}
+                {settings.showAddress !== false && settings.address && (
+                  <li className="flex items-start gap-2 text-sm">
+                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span>{settings.address}</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">

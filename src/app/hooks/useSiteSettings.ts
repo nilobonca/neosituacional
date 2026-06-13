@@ -3,11 +3,16 @@ import { supabase } from "../../lib/supabase";
 
 export interface FooterSettings {
   address: string;
-  phone: string;
+  phone?: string;
+  phones?: string[];
   email: string;
   facebook: string;
   instagram: string;
   linkedin: string;
+  showContactInfo?: boolean;
+  showAddress?: boolean;
+  showEmail?: boolean;
+  showPhones?: boolean;
 }
 
 export interface HomeBanners {
@@ -39,7 +44,23 @@ export function useSiteSettings() {
         throw error;
       }
       
-      return data?.value as FooterSettings;
+      const settings = data?.value as FooterSettings;
+      
+      // Backward compatibility and defaults
+      if (settings) {
+        if (settings.showContactInfo === undefined) {
+          settings.showContactInfo = true;
+        }
+        if (settings.showAddress === undefined) settings.showAddress = true;
+        if (settings.showEmail === undefined) settings.showEmail = true;
+        if (settings.showPhones === undefined) settings.showPhones = true;
+        
+        if (!settings.phones) {
+          settings.phones = settings.phone ? [settings.phone] : [];
+        }
+      }
+      
+      return settings;
     } catch (err: any) {
       console.error("Error fetching footer settings:", err);
       setError(err.message);
