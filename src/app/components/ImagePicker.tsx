@@ -116,7 +116,7 @@ export function ImagePicker({ onSelect, onClose, currentImage, showCaptionField 
                   </p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-500 transition"
                   >
                     Procurar Arquivo
                   </button>

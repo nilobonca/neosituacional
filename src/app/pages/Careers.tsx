@@ -7,6 +7,7 @@ import { Toast } from "../components/Toast";
 export function Careers() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [department, setDepartment] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +15,16 @@ export function Careers() {
   const [isSuccess, setIsSuccess] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const formatPhone = (val: string) => {
+    const raw = val.replace(/\D/g, '');
+    if (raw.length <= 10) {
+      return raw.replace(/(\d{2})(\d)/, '($1) $2')
+                .replace(/(\d{4})(\d)/, '$1-$2');
+    }
+    return raw.replace(/(\d{2})(\d)/, '($1) $2')
+              .replace(/(\d{5})(\d)/, '$1-$2');
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -43,7 +54,7 @@ export function Careers() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !department || !file) {
+    if (!name || !email || !phone || !department || !file) {
       setError("Por favor, preencha todos os campos e anexe seu currículo.");
       return;
     }
@@ -77,6 +88,7 @@ export function Careers() {
           {
             name,
             email,
+            phone,
             department,
             resume_url: publicUrlData.publicUrl,
             status: "new"
@@ -111,7 +123,7 @@ export function Careers() {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white border border-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-sm"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar para o início
@@ -171,6 +183,21 @@ export function Careers() {
                   required
                 />
               </div>
+              <div className="space-y-2">
+                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700">
+                  Celular / WhatsApp <span className="text-red-500 ml-0.5">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(formatPhone(e.target.value))}
+                  maxLength={15}
+                  placeholder="(00) 00000-0000"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  required
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -189,7 +216,7 @@ export function Careers() {
                 <option value="Financeiro">Financeiro</option>
                 <option value="Condomínio">Condomínio</option>
                 <option value="Jurídico">Jurídico</option>
-                <option value="Vendas">Vendas</option>
+                <option value="Comercial">Comercial</option>
               </select>
             </div>
 
@@ -246,8 +273,8 @@ export function Careers() {
             <div className="pt-6">
               <button
                 type="submit"
-                disabled={isSubmitting || !file || !name || !email || !department}
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                disabled={isSubmitting || !file || !name || !email || !phone || !department}
+                className="w-full flex justify-center py-3.5 px-4 rounded-xl shadow-sm text-base font-semibold bg-blue-600 text-white border border-blue-600 hover:bg-white hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

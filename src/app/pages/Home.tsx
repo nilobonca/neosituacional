@@ -67,7 +67,7 @@ export function Home() {
               <div className="flex flex-wrap gap-4">
                 <Link
                   to="/servicos"
-                  className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2 shadow-md"
+                  className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition-colors inline-flex items-center gap-2 shadow-md"
                 >
                   Conheça nossos serviços
                   <ArrowRight className="h-5 w-5" />
@@ -229,7 +229,7 @@ export function Home() {
           </p>
           <Link
             to="/proposta"
-            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
+            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition-colors inline-flex items-center gap-2"
           >
             Solicitar Orçamento
             <ArrowRight className="h-5 w-5" />

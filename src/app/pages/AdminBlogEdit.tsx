@@ -176,7 +176,7 @@ export function AdminBlogEdit() {
                   <button
                     type="button"
                     onClick={() => setShowImagePicker(true)}
-                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-blue-500 hover:text-white transition"
                   >
                     {formData.image ? "Trocar Imagem" : "Escolher Imagem"}
                   </button>
@@ -237,14 +237,14 @@ export function AdminBlogEdit() {
             <div className="flex justify-end gap-4 pt-6 mt-6 border-t border-gray-100">
               <Link
                 to="/admin/blog"
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-blue-500 hover:text-white transition"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-600 text-white px-8 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2 disabled:bg-blue-400"
+                className="bg-blue-600 text-white px-8 py-2 rounded-lg font-medium hover:bg-blue-500 transition flex items-center gap-2 disabled:bg-blue-400"
               >
                 {loading ? "Salvando..." : (
                   <>

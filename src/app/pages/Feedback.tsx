@@ -274,7 +274,7 @@ export function Feedback() {
 
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-blue-600 text-white border border-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
                   >
                     <Send className="h-5 w-5" />
                     Enviar Feedback

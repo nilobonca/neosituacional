@@ -37,9 +37,9 @@ export function Header() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`text-sm transition-colors ${isActive(link.path)
-                  ? "text-blue-600 font-medium"
-                  : "text-gray-600 hover:text-blue-600"
+                className={`text-sm px-3 py-2 rounded-md transition-colors ${isActive(link.path)
+                  ? "text-blue-600 font-medium bg-blue-50"
+                  : "text-gray-600 hover:bg-blue-500 hover:text-white"
                   }`}
               >
                 {link.label}
@@ -50,7 +50,7 @@ export function Header() {
 
             <Link
               to="/area-cliente/login"
-              className="bg-slate-100 text-slate-800 border border-slate-200 px-4 py-2 rounded-lg text-sm hover:bg-slate-200 font-medium transition-colors"
+              className="bg-slate-100 text-slate-800 border border-slate-200 px-4 py-2 rounded-lg text-sm hover:bg-blue-500 hover:text-white font-medium transition-colors"
             >
               Login Síndico
             </Link>
@@ -58,7 +58,7 @@ export function Header() {
               href="https://situacional.superlogica.net/clients/areadocondomino"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium transition-colors"
+              className="bg-blue-600 text-white border border-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-white hover:text-blue-600 font-medium transition-colors"
             >
               Área do Cliente
             </a>
@@ -90,9 +90,9 @@ export function Header() {
                   key={link.path}
                   to={link.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`text-sm transition-colors ${isActive(link.path)
-                    ? "text-blue-600 font-medium"
-                    : "text-gray-600 hover:text-blue-600"
+                  className={`text-sm px-4 py-3 rounded-lg transition-colors ${isActive(link.path)
+                    ? "text-blue-600 font-medium bg-blue-50"
+                    : "text-gray-600 hover:bg-blue-500 hover:text-white"
                     }`}
                 >
                   {link.label}
@@ -101,7 +101,7 @@ export function Header() {
               <Link
                 to="/area-cliente/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="bg-slate-100 text-slate-800 border border-slate-200 px-4 py-2 rounded-lg text-sm hover:bg-slate-200 font-medium transition-colors text-center"
+                className="bg-slate-100 text-slate-800 border border-slate-200 px-4 py-2 rounded-lg text-sm hover:bg-blue-500 hover:text-white font-medium transition-colors text-center"
               >
                 Login Síndico
               </Link>
@@ -110,7 +110,7 @@ export function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 font-medium transition-colors text-center"
+                className="bg-blue-600 text-white border border-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-white hover:text-blue-600 font-medium transition-colors text-center"
               >
                 Área do Cliente
               </a>

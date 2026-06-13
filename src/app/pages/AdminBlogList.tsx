@@ -40,7 +40,7 @@ export function AdminBlogList() {
           </div>
           <Link
             to="/admin/blog/new"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-500 transition flex items-center gap-2"
           >
             <Plus className="h-5 w-5" />
             Novo Post
@@ -107,7 +107,7 @@ export function AdminBlogList() {
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => handleToggleFeatured(post)}
-                          className="p-1.5 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="p-1.5 rounded-full hover:bg-blue-500 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                           title={post.featured ? "Remover dos destaques" : "Destacar post"}
                         >
                           <Star 

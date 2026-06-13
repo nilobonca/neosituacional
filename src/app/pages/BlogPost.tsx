@@ -142,7 +142,7 @@ export function BlogPost() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {post.tags.map(tag => (
-                  <span key={tag} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition-colors cursor-pointer">
+                  <span key={tag} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-blue-500 hover:text-white transition-colors cursor-pointer">
                     #{tag}
                   </span>
                 ))}

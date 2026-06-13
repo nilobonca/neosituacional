@@ -58,3 +58,18 @@
 .bg-situational-blue {
   background-color: #235487;
 }
+
+/* Ensure all buttons and links change cursor on hover */
+button, 
+a, 
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+input[type="submit"]:disabled,
+input[type="button"]:disabled {
+  cursor: not-allowed;
+}

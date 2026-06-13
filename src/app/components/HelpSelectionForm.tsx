@@ -77,20 +77,20 @@ export function HelpSelectionForm({ compact = false }: HelpSelectionFormProps) {
           <button
             key={option.id}
             onClick={() => handleNavigate(option.route)}
-            className={`w-full flex items-center justify-between ${compact ? "px-3 py-2.5" : "p-4"} bg-white border border-gray-200 hover:border-[#235487]/50 rounded-xl transition-all duration-200 outline-none text-left group shadow-sm hover:shadow-md
+            className={`w-full flex items-center justify-between ${compact ? "px-3 py-2.5" : "p-4"} bg-white border border-gray-200 hover:bg-blue-500 hover:border-blue-500 rounded-xl transition-all duration-200 outline-none text-left group shadow-sm hover:shadow-md
               focus-visible:ring-2 focus-visible:ring-[#235487] focus-visible:border-[#235487]
             `}
           >
             <div className="flex items-center gap-3.5">
-              <div className={`${compact ? "p-1.5" : "p-2"} bg-gray-50 text-gray-600 rounded-lg group-hover:bg-blue-50 group-hover:text-[#235487] transition-colors duration-200`}>
+              <div className={`${compact ? "p-1.5" : "p-2"} bg-gray-50 text-gray-600 rounded-lg group-hover:bg-white/20 group-hover:text-white transition-colors duration-200`}>
                 {option.icon}
               </div>
-              <span className={`font-semibold ${compact ? "text-[13px]" : "text-sm"} text-gray-700 group-hover:text-gray-900 transition-colors duration-200`}>
+              <span className={`font-semibold ${compact ? "text-[13px]" : "text-sm"} text-gray-700 group-hover:text-white transition-colors duration-200`}>
                 {option.label}
               </span>
             </div>
             
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#235487] group-hover:translate-x-1 transition-all duration-200" />
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all duration-200" />
           </button>
         ))}
       </div>

@@ -104,7 +104,7 @@ export function AdminCondominiums() {
         </div>
         <button
           onClick={openNewForm}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-500 transition flex items-center gap-2"
         >
           <Plus className="h-4 w-4" /> Novo Condomínio
         </button>

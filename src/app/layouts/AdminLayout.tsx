@@ -14,6 +14,7 @@ import {
   Briefcase,
   FileSignature,
   Truck,
+  Building2,
   Globe
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -149,14 +150,14 @@ export function AdminLayout() {
           <Link
             to="/"
             target="_blank"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-blue-500 hover:text-white transition-colors"
           >
             <Globe size={20} />
             <span className="font-medium">Acessar o Site</span>
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-blue-500 hover:text-white hover:text-red-400 hover:bg-red-900/20 transition-colors"
           >
             <LogOut size={20} />
             <span className="font-medium">Sair do Painel</span>

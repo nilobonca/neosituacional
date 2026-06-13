@@ -109,7 +109,7 @@ export function AdminTestimonials() {
         </div>
         <button
           onClick={openNewForm}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-500 transition flex items-center gap-2"
         >
           <Plus className="h-4 w-4" /> Novo Depoimento
         </button>
@@ -188,7 +188,7 @@ export function AdminTestimonials() {
                   {form.avatar_url ? (
                     <img src={form.avatar_url} className="h-12 w-12 rounded-full object-cover border" />
                   ) : <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center"><User className="text-gray-400 h-6 w-6" /></div>}
-                  <button type="button" onClick={() => setShowImagePicker(true)} className="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">
+                  <button type="button" onClick={() => setShowImagePicker(true)} className="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-blue-500 hover:text-white">
                     Escolher / Enviar Foto
                   </button>
                   {form.avatar_url && (

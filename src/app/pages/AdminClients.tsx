@@ -110,7 +110,7 @@ export function AdminClients() {
         </div>
         <button
           onClick={openNewForm}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition flex items-center gap-2"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-500 transition flex items-center gap-2"
         >
           <Plus className="h-4 w-4" /> Novo Cliente
         </button>
@@ -195,7 +195,7 @@ export function AdminClients() {
                   {form.logo_url ? (
                     <img src={form.logo_url} className="h-16 w-max object-contain border rounded p-1" />
                   ) : <div className="h-16 w-16 bg-gray-100 rounded flex items-center justify-center"><ImageIcon className="text-gray-400" /></div>}
-                  <button type="button" onClick={() => setShowImagePicker(true)} className="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50">
+                  <button type="button" onClick={() => setShowImagePicker(true)} className="px-3 py-1.5 border border-gray-300 rounded text-sm hover:bg-blue-500 hover:text-white">
                     Escolher / Enviar Logo
                   </button>
                 </div>

@@ -135,7 +135,7 @@ export function CondoLayout() {
         <div className="p-4 border-t border-slate-800 mt-auto">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-blue-500 hover:text-white hover:text-red-400 hover:bg-red-900/20 transition-colors"
           >
             <LogOut size={20} />
             <span className="font-medium">Sair do Painel</span>

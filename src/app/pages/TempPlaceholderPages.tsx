@@ -30,7 +30,7 @@ export function TempPlaceholderPage({ title, description, icon }: PlaceholderPro
           <div className="flex flex-col gap-2 pt-4">
             <Link
               to="/"
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 border.2 border-gray-200 text-sm font-semibold text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 rounded-lg transition-colors border"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 border.2 border-gray-200 text-sm font-semibold text-gray-700  bg-white hover:bg-blue-500 hover:text-white rounded-lg transition-colors border"
             >
               <ArrowLeft className="h-4 w-4" />
               Voltar para o Início

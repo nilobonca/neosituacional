@@ -111,8 +111,8 @@ export function Proposal() {
       return false;
     }
 
-    if (files.length !== 3) {
-      setError("Você deve anexar exatamente 3 arquivos (últimos balancetes) do condomínio.");
+    if (files.length === 0 || files.length > 3) {
+      setError("Você deve anexar de 1 a 3 arquivos (balancetes) do condomínio.");
       return false;
     }
 
@@ -200,7 +200,7 @@ export function Proposal() {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white border border-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-sm"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar para o início
@@ -363,7 +363,7 @@ export function Proposal() {
             {/* Sessão 3: Arquivos */}
             <div className="space-y-6 pt-4">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">3. Arquivos para Análise</h3>
-              <p className="font-medium text-blue-700 mb-2">Faça upload dos ultimos 3(Três) balancetes para analise. <span className="text-red-500 ml-0.5">*</span></p>
+              <p className="font-medium text-blue-700 mb-2">Faça upload de 1 a 3 balancetes para análise. <span className="text-red-500 ml-0.5">*</span></p>
               
               <div className="space-y-4">
                 {files.length < 3 && (
@@ -429,7 +429,7 @@ export function Proposal() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full flex justify-center py-4 px-4 rounded-xl shadow-sm text-lg font-semibold bg-blue-600 text-white border border-blue-600 hover:bg-white hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

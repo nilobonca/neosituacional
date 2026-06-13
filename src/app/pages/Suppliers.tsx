@@ -16,28 +16,28 @@ export function Suppliers() {
 
   // File State
   const [file, setFile] = useState<File | null>(null);
-  
+
   // UI State
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const formatPhone = (val: string) => {
     const raw = val.replace(/\D/g, '');
     if (raw.length <= 10) {
       return raw.replace(/(\d{2})(\d)/, '($1) $2')
-                .replace(/(\d{4})(\d)/, '$1-$2');
+        .replace(/(\d{4})(\d)/, '$1-$2');
     }
     return raw.replace(/(\d{2})(\d)/, '($1) $2')
-              .replace(/(\d{5})(\d)/, '$1-$2');
+      .replace(/(\d{5})(\d)/, '$1-$2');
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     const selectedFile = e.target.files?.[0];
-    
+
     if (!selectedFile) return;
 
     if (!selectedFile.type.startsWith("image/")) {
@@ -49,9 +49,9 @@ export function Suppliers() {
       setError(`O arquivo excede o limite de 5MB.`);
       return;
     }
-    
+
     setFile(selectedFile);
-    
+
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -97,7 +97,7 @@ export function Suppliers() {
         const { data: publicUrlData } = supabase.storage
           .from("suppliers_logos")
           .getPublicUrl(filePath);
-          
+
         publicUrl = publicUrlData.publicUrl;
       }
 
@@ -133,7 +133,7 @@ export function Suppliers() {
   if (isSuccess) {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl text-center">
-        <div 
+        <div
           className="bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center"
         >
           <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
@@ -146,7 +146,7 @@ export function Suppliers() {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white border border-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-sm"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar para o início
@@ -266,7 +266,7 @@ export function Suppliers() {
             {/* Sessão 3: Termos e Logo */}
             <div className="space-y-6 pt-4">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">3. Anexos e Permissões</h3>
-              
+
               <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
                 <div className="flex items-center h-6">
                   <input
@@ -279,7 +279,7 @@ export function Suppliers() {
                 </div>
                 <div className="flex items-center flex-wrap gap-2">
                   <label htmlFor="competeBudgets" className="text-sm font-semibold text-gray-900 cursor-pointer select-none">
-                    Quero disputar orçamentos dos condomínios <span className="text-red-500 ml-0.5">*</span>
+                    Quero participar da cotação orçamentária <span className="text-red-500 ml-0.5">*</span>
                   </label>
                   <div className="relative group flex items-center justify-center">
                     <Info className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
@@ -293,9 +293,9 @@ export function Suppliers() {
 
               <div className="space-y-4 pt-2">
                 <label className="block text-sm font-semibold text-gray-700">Pequena logo da empresa (Opcional)</label>
-                
+
                 {!file ? (
-                  <div 
+                  <div
                     className="flex justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 py-8 hover:border-blue-500 hover:bg-blue-50/50 transition-colors cursor-pointer group"
                     onClick={() => fileInputRef.current?.click()}
                   >
@@ -330,7 +330,7 @@ export function Suppliers() {
                     </button>
                   </div>
                 )}
-                
+
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -346,7 +346,7 @@ export function Suppliers() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full flex justify-center py-4 px-4 rounded-xl shadow-sm text-lg font-semibold bg-blue-600 text-white border border-blue-600 hover:bg-white hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

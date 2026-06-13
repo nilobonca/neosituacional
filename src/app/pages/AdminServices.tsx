@@ -118,7 +118,7 @@ export function AdminServices() {
         {!isEditing && (
           <button
             onClick={handleAddNew}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors shadow-sm"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-500 transition-colors shadow-sm"
           >
             <Plus className="h-4 w-4" />
             Novo Serviço
@@ -213,14 +213,14 @@ export function AdminServices() {
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-blue-500 hover:text-white"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-500"
               >
                 {saving && <Loader2 className="animate-spin h-4 w-4" />}
                 {saving ? "Salvando..." : "Salvar Serviço"}
@@ -244,7 +244,7 @@ export function AdminServices() {
                   >
                     {service.active ? "Ativo no Site" : "Oculto"}
                   </button>
-                  <button onClick={() => handleEdit(service)} className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"><Edit2 className="h-4 w-4" /></button>
+                  <button onClick={() => handleEdit(service)} className="p-1.5 text-gray-500 hover:bg-blue-500 hover:text-white rounded-md transition-colors"><Edit2 className="h-4 w-4" /></button>
                   <button onClick={() => handleDelete(service.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"><Trash2 className="h-4 w-4" /></button>
                 </div>
               </div>

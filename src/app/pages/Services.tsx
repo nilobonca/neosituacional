@@ -76,7 +76,7 @@ export function Services() {
           <div className="flex flex-wrap gap-4 justify-center">
             <a
               href="/proposta"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition-colors"
             >
               Solicitar Orçamento
             </a>

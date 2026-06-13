@@ -127,7 +127,7 @@ export function AdminCareers() {
                         <a
                           href={app.resume_url}
                           download={`Curriculo_${app.name.replace(/\s+/g, '_')}.pdf`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
                           title="Fazer Download"
                         >
                           <Download className="w-4 h-4" />
