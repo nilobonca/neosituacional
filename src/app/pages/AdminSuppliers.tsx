@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
-import { Briefcase, Calendar, Phone, Mail, Building2, DollarSign, CheckCircle2, XCircle, Info, ExternalLink } from "lucide-react";
+import { Briefcase, Calendar, Phone, Mail, Building2, DollarSign, CheckCircle2, XCircle, Info, ExternalLink, UserPlus } from "lucide-react";
 
 interface Supplier {
   id: string;
   company_name: string;
   email: string;
   phone: string;
+  website?: string;
   work_offered: string;
   common_services: string;
   average_value: string;
@@ -65,6 +66,30 @@ export function AdminSuppliers() {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const addToPartners = async (supplier: Supplier) => {
+    if (!supplier.logo_url) {
+      alert("Este fornecedor não possui uma logo cadastrada. A logo é obrigatória para a área de Parceiros.");
+      return;
+    }
+    
+    if (!window.confirm(`Deseja adicionar a empresa "${supplier.company_name}" à área de Clientes & Parceiros?`)) return;
+    
+    try {
+      const { error } = await supabase.from("clients").insert([{
+        name: supplier.company_name,
+        logo_url: supplier.logo_url,
+        website_url: supplier.website || "",
+        active: true
+      }]);
+      
+      if (error) throw error;
+      alert("Empresa adicionada com sucesso aos Clientes & Parceiros!");
+    } catch (err: any) {
+      console.error("Erro ao adicionar parceiro:", err);
+      alert("Erro ao adicionar parceiro: " + err.message);
     }
   };
 
@@ -172,10 +197,18 @@ export function AdminSuppliers() {
                         <Phone className="w-4 h-4 text-gray-400" />
                         {supplier.phone}
                       </div>
-                      <div className="text-sm text-gray-700 flex items-center gap-1.5">
+                      <div className="text-sm text-gray-700 flex items-center gap-1.5 mb-2">
                         <Mail className="w-4 h-4 text-gray-400" />
                         {supplier.email}
                       </div>
+                      {supplier.website && (
+                        <div className="text-sm text-gray-700 flex items-center gap-1.5">
+                          <ExternalLink className="w-4 h-4 text-gray-400" />
+                          <a href={supplier.website.startsWith('http') ? supplier.website : `https://${supplier.website}`} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 truncate max-w-[200px] inline-block" title={supplier.website}>
+                            Site da Empresa
+                          </a>
+                        </div>
+                      )}
                     </td>
 
                     {/* Coluna 3: Serviços */}
@@ -226,20 +259,31 @@ export function AdminSuppliers() {
                           {formatDate(supplier.created_at)}
                         </div>
                         
-                        <div className="mt-2 flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
-                          <input
-                            type="checkbox"
-                            id={`accept-${supplier.id}`}
-                            checked={supplier.status === 'accepted'}
-                            onChange={() => toggleAcceptStatus(supplier.id, supplier.status)}
-                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
-                          />
-                          <label 
-                            htmlFor={`accept-${supplier.id}`}
-                            className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                        <div className="mt-2 flex flex-col gap-2">
+                          <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                            <input
+                              type="checkbox"
+                              id={`accept-${supplier.id}`}
+                              checked={supplier.status === 'accepted'}
+                              onChange={() => toggleAcceptStatus(supplier.id, supplier.status)}
+                              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                            />
+                            <label 
+                              htmlFor={`accept-${supplier.id}`}
+                              className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+                            >
+                              Aceito na Lista
+                            </label>
+                          </div>
+                          
+                          <button
+                            onClick={() => addToPartners(supplier)}
+                            className="flex items-center justify-center gap-1.5 w-full bg-white border border-blue-200 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium shadow-sm"
+                            title="Adicionar à aba de Clientes e Parceiros do site"
                           >
-                            Aceito na Lista
-                          </label>
+                            <UserPlus className="w-4 h-4" />
+                            Tornar Parceiro
+                          </button>
                         </div>
                       </div>
                     </td>

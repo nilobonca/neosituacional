@@ -9,6 +9,7 @@ export function Suppliers() {
   const [companyName, setCompanyName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
   const [workOffered, setWorkOffered] = useState("");
   const [commonServices, setCommonServices] = useState("");
   const [averageValue, setAverageValue] = useState("");
@@ -109,6 +110,7 @@ export function Suppliers() {
             company_name: companyName,
             phone,
             email,
+            website: website || null,
             work_offered: workOffered,
             common_services: commonServices,
             average_value: averageValue,
@@ -220,6 +222,16 @@ export function Suppliers() {
                     required
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">Site da Empresa (Opcional)</label>
+                  <input
+                    type="url"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    placeholder="https://www.suaempresa.com.br"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
               </div>
             </div>
 
@@ -292,7 +304,16 @@ export function Suppliers() {
               </div>
 
               <div className="space-y-4 pt-2">
-                <label className="block text-sm font-semibold text-gray-700">Pequena logo da empresa (Opcional)</label>
+                <div className="flex items-center gap-2">
+                  <label className="block text-sm font-semibold text-gray-700">Pequena logo da empresa (Opcional)</label>
+                  <div className="relative group flex items-center justify-center">
+                    <Info className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                      O envio da logo facilita o processo de destaque como parceiro na página principal do site
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </div>
 
                 {!file ? (
                   <div
