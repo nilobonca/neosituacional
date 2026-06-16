@@ -137,11 +137,11 @@ export function AdminProposals() {
                         </div>
                       </td>
                       <td className="px-6 py-4 align-top">
-                        <div className="text-sm text-gray-700 bg-gray-50 rounded-lg p-2 border border-gray-100 grid grid-cols-2 gap-x-4 gap-y-1">
-                          <div><span className="text-gray-500">Blocos:</span> <strong>{prop.blocks}</strong></div>
-                          <div><span className="text-gray-500">Aptos:</span> <strong>{prop.apartments}</strong></div>
-                          <div><span className="text-gray-500">Casas:</span> <strong>{prop.houses}</strong></div>
-                          <div><span className="text-gray-500">Func:</span> <strong>{prop.employees}</strong></div>
+                        <div className="text-sm text-gray-700 bg-gray-50 rounded-lg p-2.5 border border-gray-100 grid grid-cols-1 2xl:grid-cols-2 gap-x-4 gap-y-2 min-w-[130px]">
+                          <div className="whitespace-nowrap flex justify-between gap-2"><span className="text-gray-500">Blocos:</span> <strong>{prop.blocks}</strong></div>
+                          <div className="whitespace-nowrap flex justify-between gap-2"><span className="text-gray-500">Aptos:</span> <strong>{prop.apartments}</strong></div>
+                          <div className="whitespace-nowrap flex justify-between gap-2"><span className="text-gray-500">Casas:</span> <strong>{prop.houses}</strong></div>
+                          <div className="whitespace-nowrap flex justify-between gap-2"><span className="text-gray-500">Func:</span> <strong>{prop.employees}</strong></div>
                         </div>
                       </td>
                       <td className="px-6 py-4 align-top whitespace-nowrap">
