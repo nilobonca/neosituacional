@@ -4,10 +4,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 
 export function Root() {
-  const location = useLocation();
-
-  // Garante que o scroll vá para o topo instantaneamente ao mudar de página
-  useEffect(() => {
+  const location = useLocation();  useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 

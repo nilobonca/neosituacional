@@ -14,7 +14,6 @@ export function CondoLogin() {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Verifica a role para saber para onde mandar
         const { data: roleData } = await supabase
           .from("profiles")
           .select("role")
@@ -46,8 +45,6 @@ export function CondoLogin() {
       setLoading(false);
       return;
     }
-
-    // Após o login, verifica a role
     const { data: roleData, error: roleError } = await supabase
       .from("profiles")
       .select("role")

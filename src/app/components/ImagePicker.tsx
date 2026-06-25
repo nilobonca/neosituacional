@@ -25,8 +25,6 @@ export function ImagePicker({ onSelect, onClose, currentImage, showCaptionField 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validação básica
     if (!file.type.startsWith("image/")) {
       alert("Por favor, selecione apenas arquivos de imagem.");
       return;
@@ -49,7 +47,7 @@ export function ImagePicker({ onSelect, onClose, currentImage, showCaptionField 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Header */}
+        
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900">Selecionar Imagem de Capa</h2>
           <button
@@ -60,7 +58,7 @@ export function ImagePicker({ onSelect, onClose, currentImage, showCaptionField 
           </button>
         </div>
 
-        {/* Tabs */}
+        
         <div className="flex border-b border-gray-100">
           <button
             onClick={() => setActiveTab("upload")}
@@ -86,7 +84,7 @@ export function ImagePicker({ onSelect, onClose, currentImage, showCaptionField 
           </button>
         </div>
 
-        {/* Content */}
+        
         <div className="p-6 overflow-y-auto flex-1 bg-gray-50">
           {activeTab === "upload" ? (
             <div className="h-full min-h-[300px] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl bg-white p-8">
@@ -179,7 +177,7 @@ export function ImagePicker({ onSelect, onClose, currentImage, showCaptionField 
           )}
         </div>
 
-        {/* Optional Caption Field */}
+        
         {showCaptionField && (
           <div className="p-4 border-t border-gray-100 bg-white">
             <label className="block text-sm font-medium text-gray-700 mb-2">

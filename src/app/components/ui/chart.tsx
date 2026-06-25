@@ -3,10 +3,7 @@
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
 
-import { cn } from "./utils";
-
-// Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { light: "", dark: ".dark" } as const;
+import { cn } from "./utils";const THEMES = { light: "", dark: ".dark" } as const;
 
 export type ChartConfig = {
   [k in string]: {
@@ -302,10 +299,7 @@ function ChartLegendContent({
       })}
     </div>
   );
-}
-
-// Helper to extract item config from a payload.
-function getPayloadConfigFromPayload(
+}function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,
   key: string,

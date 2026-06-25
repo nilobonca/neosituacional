@@ -8,8 +8,6 @@ export function AdminServices() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentService, setCurrentService] = useState<Partial<ServiceItem> | null>(null);
   const [saving, setSaving] = useState(false);
-  
-  // Lista dos ícones possíveis pro admin escolher
   const availableIcons = ["Wallet", "Scale", "Wrench", "MessageSquare", "Users", "Shield", "Building", "Briefcase", "CheckCircle", "FileText", "Home", "Key", "Star"];
 
   useEffect(() => {
@@ -39,7 +37,6 @@ export function AdminServices() {
 
     setSaving(true);
     try {
-      // Limpa features em branco
       const cleanFeatures = (currentService.features || []).filter(f => f.trim() !== "");
       const dataToSave = { ...currentService, features: cleanFeatures };
 
@@ -92,8 +89,6 @@ export function AdminServices() {
       });
     }
   };
-
-  // Helper to render lucide icons dynamically
   const renderIcon = (iconName: string, className = "h-5 w-5") => {
     const IconComponent = (Icons as any)[iconName] || Icons.HelpCircle;
     return <IconComponent className={className} />;

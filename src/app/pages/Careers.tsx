@@ -63,7 +63,6 @@ export function Careers() {
     setError(null);
 
     try {
-      // 1. Upload do arquivo para o Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${name.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
       const filePath = `curriculos/${fileName}`;
@@ -75,13 +74,9 @@ export function Careers() {
       if (uploadError) {
         throw new Error("Erro ao enviar o arquivo. Tente novamente mais tarde.");
       }
-
-      // 2. Obter a URL pública do arquivo
       const { data: publicUrlData } = supabase.storage
         .from("resumes")
         .getPublicUrl(filePath);
-
-      // 3. Salvar os dados na tabela job_applications
       const { error: dbError } = await supabase
         .from("job_applications")
         .insert([

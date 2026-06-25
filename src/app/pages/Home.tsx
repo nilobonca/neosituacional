@@ -52,11 +52,11 @@ export function Home() {
 
   return (
     <div>
-      {/* Hero Section */}
+      
       <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column: Hero Content */}
+            
             <div className="lg:col-span-7">
               <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
                 {banners.heroTitle}
@@ -75,7 +75,7 @@ export function Home() {
               </div>
             </div>
 
-            {/* Right Column: Interactive Help Selection Form */}
+            
             <div className="lg:col-span-5 w-full">
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl text-gray-900 border border-white/20">
                 <HelpSelectionForm compact={true} />
@@ -85,7 +85,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Blog Posts Carousel */}
+      
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -114,7 +114,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Clientes e Parceiros */}
+      
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -130,9 +130,7 @@ export function Home() {
               <div className="text-center text-gray-400 italic py-8">
                 Nenhum parceiro adicionado ainda...
               </div>
-            ) : (
-              // Modo Grid Normal sem animação
-              <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center py-8">
+            ) : (              <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center py-8">
                 {activeClients.map((client) => {
                   const CardComponent = client.website_url ? 'a' : 'div';
                   const linkProps = client.website_url ? { href: client.website_url, target: "_blank", rel: "noopener noreferrer" } : {};
@@ -158,7 +156,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Featured Feedbacks */}
+      
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -218,7 +216,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      
       <section className="py-16 bg-blue-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">

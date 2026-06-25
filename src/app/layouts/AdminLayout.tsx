@@ -24,8 +24,6 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Verificação de Autenticação (Guardião)
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -34,8 +32,6 @@ export function AdminLayout() {
         navigate("/admin/login");
         return;
       }
-
-      // Verifica se é admin
       const { data: roleData } = await supabase
         .from("profiles")
         .select("role")
@@ -51,8 +47,6 @@ export function AdminLayout() {
     };
     
     checkAuth();
-
-    // Listener para mudanças de auth (ex: logout em outra aba)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         navigate("/admin/login");
@@ -99,7 +93,7 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      {/* Mobile Header (replaces sidebar on small screens) */}
+      
       <div className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
         <Link to="/admin" className="flex items-center gap-2">
           <img src={logo} alt="Logo" className="h-6 w-auto bg-white rounded p-0.5" />
@@ -110,7 +104,7 @@ export function AdminLayout() {
         </button>
       </div>
 
-      {/* Sidebar */}
+      
       <aside 
         className={`${
           sidebarOpen ? "block" : "hidden"
@@ -165,7 +159,7 @@ export function AdminLayout() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      
       <main className="flex-1 flex flex-col min-w-0 pb-10">
         <div className="p-4 md:p-8">
           <Outlet />

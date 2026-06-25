@@ -38,15 +38,12 @@ export function useSiteSettings() {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // Record not found, return null to use fallback
           return null;
         }
         throw error;
       }
       
       const settings = data?.value as FooterSettings;
-      
-      // Backward compatibility and defaults
       if (settings) {
         if (settings.showContactInfo === undefined) {
           settings.showContactInfo = true;

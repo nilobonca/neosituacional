@@ -14,8 +14,6 @@ interface BlockEditorProps {
 
 export function BlockEditor({ initialContent, onChange }: BlockEditorProps) {
   const { uploadImage } = useStorage();
-
-  // Função customizada para upload de imagem no BlockNote
   const handleUpload = async (file: File) => {
     const url = await uploadImage(file);
     if (!url) {
@@ -23,16 +21,12 @@ export function BlockEditor({ initialContent, onChange }: BlockEditorProps) {
     }
     return url;
   };
-
-  // Cria e configura o editor
   const editor = useCreateBlockNote({
     uploadFile: handleUpload,
   });
 
   const [initialContentSet, setInitialContentSet] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
-
-  // Carrega o conteúdo inicial (Markdown para Blocos)
   useEffect(() => {
     async function loadMarkdown() {
       if (editor && initialContent && !initialContentSet) {
@@ -45,8 +39,6 @@ export function BlockEditor({ initialContent, onChange }: BlockEditorProps) {
     }
     loadMarkdown();
   }, [editor, initialContent, initialContentSet]);
-
-  // Se ainda estiver carregando (convertendo markdown antigo para blocos)
   if (!editor || !initialContentSet) {
     return (
       <div className="w-full px-4 py-8 border border-gray-300 rounded-lg text-center text-gray-500 bg-gray-50 animate-pulse">
@@ -59,7 +51,7 @@ export function BlockEditor({ initialContent, onChange }: BlockEditorProps) {
     <div className="border border-gray-300 rounded-lg bg-white overflow-hidden min-h-[500px] flex flex-col">
       <style>
         {`
-          /* Customizações finas p/ o BlockNote parecer mais integrado */
+          
           .bn-editor {
             flex-grow: 1;
             padding: 2rem 1rem !important;
@@ -86,7 +78,6 @@ export function BlockEditor({ initialContent, onChange }: BlockEditorProps) {
         theme="light"
         formattingToolbar={true}
         onChange={async () => {
-          // Quando algo muda, converte de volta para Markdown e envia pro form
           const markdown = await editor.blocksToMarkdownLossy(editor.document);
           onChange(markdown);
         }}
@@ -97,7 +88,6 @@ export function BlockEditor({ initialContent, onChange }: BlockEditorProps) {
           showCaptionField={true}
           onClose={() => setShowGallery(false)}
           onSelect={({ url, caption }) => {
-            // Insere o bloco de imagem no local atual (ou no fim)
             const currentBlock = editor.getTextCursorPosition().block;
             editor.insertBlocks(
               [

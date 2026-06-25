@@ -96,7 +96,7 @@ export function Feedback() {
 
   return (
     <div className="py-16">
-      {/* Header */}
+      
       <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">
@@ -110,7 +110,7 @@ export function Feedback() {
 
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Existing Feedbacks */}
+          
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               Depoimentos de Nossos Clientes
@@ -165,7 +165,7 @@ export function Feedback() {
             </div>
           </div>
 
-          {/* Feedback Form */}
+          
           <div>
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-20">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -285,7 +285,7 @@ export function Feedback() {
           </div>
         </div>
 
-        {/* Stats Section */}
+        
         <div className="mt-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
           <h2 className="text-2xl font-bold mb-8 text-center">
             Nossa Avaliação

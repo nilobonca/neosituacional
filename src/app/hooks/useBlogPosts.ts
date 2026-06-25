@@ -31,8 +31,6 @@ export function useBlogPosts() {
         .order("date", { ascending: false });
 
       if (error) throw error;
-      
-      // Mapeia snake_case para camelCase se necessário
       const formattedData = data.map((item: any) => ({
         ...item,
         readingTime: item.reading_time || item.readingTime
@@ -68,7 +66,6 @@ export function useBlogPosts() {
 
   const addPost = async (post: Omit<BlogPost, "id" | "views">) => {
     try {
-      // Calcular tempo de leitura estimado (aprox. 200 palavras por min)
       const words = post.content.trim().split(/\s+/).length;
       const calcReadingTime = Math.ceil(words / 200);
       const readingTimeStr = `${calcReadingTime} min leitura`;
@@ -103,15 +100,11 @@ export function useBlogPosts() {
   const updatePost = async (id: number | string, post: Partial<BlogPost>) => {
     try {
       let updateData = { ...post };
-      
-      // Se conteúdo mudou, recalcular tempo de leitura
       if (post.content) {
         const words = post.content.trim().split(/\s+/).length;
         const calcReadingTime = Math.ceil(words / 200);
         updateData.reading_time = `${calcReadingTime} min leitura`; 
       }
-      
-      // Remove readingTime (camelCase) to avoid Supabase schema error
       if ('readingTime' in updateData) {
         delete (updateData as any).readingTime;
       }
@@ -155,8 +148,6 @@ export function useBlogPosts() {
 
   const incrementViews = async (id: number | string) => {
     try {
-      // Método RPC no Supabase (precisa ser criado para view count atômico)
-      // Ou um simples select + update para demonstração (se não quiser usar RPC)
       const { data: currentPost, error: fetchErr } = await supabase
         .from("posts")
         .select("views")

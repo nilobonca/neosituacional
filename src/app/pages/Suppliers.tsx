@@ -5,7 +5,6 @@ import { supabase } from "../../lib/supabase";
 import { Toast } from "../components/Toast";
 
 export function Suppliers() {
-  // Form State
   const [companyName, setCompanyName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -14,11 +13,7 @@ export function Suppliers() {
   const [commonServices, setCommonServices] = useState("");
   const [averageValue, setAverageValue] = useState("");
   const [competeBudgets, setCompeteBudgets] = useState(false);
-
-  // File State
   const [file, setFile] = useState<File | null>(null);
-
-  // UI State
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -85,8 +80,6 @@ export function Suppliers() {
         const cleanName = companyName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
         const fileName = `${Date.now()}_${cleanName}.${fileExt}`;
         const filePath = `logos/${fileName}`;
-
-        // 1. Upload Logo
         const { error: uploadError } = await supabase.storage
           .from("suppliers_logos")
           .upload(filePath, file);
@@ -101,8 +94,6 @@ export function Suppliers() {
 
         publicUrl = publicUrlData.publicUrl;
       }
-
-      // 2. Save data to database
       const { error: dbError } = await supabase
         .from("suppliers_applications")
         .insert([
@@ -184,7 +175,7 @@ export function Suppliers() {
           <Toast message={error} onClose={() => setError(null)} />
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Sessão 1: Dados da Empresa */}
+            
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">1. Dados Básicos da Empresa</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -235,7 +226,7 @@ export function Suppliers() {
               </div>
             </div>
 
-            {/* Sessão 2: Sobre os Serviços */}
+            
             <div className="space-y-6 pt-4">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">2. Sobre o Serviço</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -275,7 +266,7 @@ export function Suppliers() {
               </div>
             </div>
 
-            {/* Sessão 3: Termos e Logo */}
+            
             <div className="space-y-6 pt-4">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">3. Anexos e Permissões</h3>
 
@@ -362,7 +353,7 @@ export function Suppliers() {
               </div>
             </div>
 
-            {/* Envio */}
+            
             <div className="pt-8 mt-8 border-t border-gray-100">
               <button
                 type="submit"

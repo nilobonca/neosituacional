@@ -36,7 +36,6 @@ export function useServices() {
       setServices(data || []);
     } catch (err: any) {
       console.error("Error fetching services:", err);
-      // Suppress missing table error so we can still render if they haven't executed the SQL yet
       if (err.code !== '42P01') {
         setError(err.message);
       }

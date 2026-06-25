@@ -19,11 +19,7 @@ export function AdminSettings() {
     linkedin: "",
     showContactInfo: true
   });
-
-  // Carousel state
   const [carouselItems, setCarouselItems] = useState<{ id: string, image: string, title?: string, link?: string }[]>([]);
-
-  // Banners state
   const [homeBanners, setHomeBanners] = useState({
     heroTitle: "",
     heroSubtitle: "",
@@ -188,7 +184,7 @@ export function AdminSettings() {
       </div>
 
 
-      {/* SESSÃO FOOTER */}
+      
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div>
@@ -285,7 +281,7 @@ export function AdminSettings() {
         </div>
       </div>
 
-      {/* SESSÃO BANNERS DA HOME */}
+      
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
           <h2 className="text-lg font-bold text-gray-900">3. Banners da Página Inicial</h2>

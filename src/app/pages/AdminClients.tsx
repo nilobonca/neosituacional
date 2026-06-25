@@ -53,11 +53,9 @@ export function AdminClients() {
     setSaving(true);
     try {
       if (form.id) {
-        // Atualiza
         const { error } = await supabase.from("clients").update(form).eq("id", form.id);
         if (error) throw error;
       } else {
-        // Insere
         const { error } = await supabase.from("clients").insert([form]);
         if (error) throw error;
       }
@@ -163,7 +161,7 @@ export function AdminClients() {
         </div>
       )}
 
-      {/* MODAL CLIENTE */}
+      
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">

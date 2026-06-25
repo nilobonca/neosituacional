@@ -23,7 +23,7 @@ export function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          
           <Link to="/" className="flex items-center gap-2">
             <img src={logo} alt="SITUACIONAL Logo" className="h-10 w-auto" />
             <span className="font-bold text-xl text-situational-blue font-montserrat">
@@ -31,7 +31,7 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          
           <nav className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
@@ -46,6 +46,9 @@ export function Header() {
               </Link>
             ))}
             
+            <a href="http://oficinadojuan.com.br/" target="_blank" rel="noopener noreferrer" className="mx-2 flex items-center justify-center transition-transform hover:scale-105" title="Feito por Juan Rego">
+              <img src="/juan-logo.png" alt="Juan Rego Logo" className="h-8 w-8 rounded-full object-cover shadow-sm border border-gray-200" />
+            </a>
 
 
             <Link
@@ -64,10 +67,10 @@ export function Header() {
             </a>
           </nav>
 
-          {/* Mobile Actions */}
+          
           <div className="flex items-center gap-2 md:hidden">
 
-            {/* Mobile Menu Button */}
+            
             <button
               className="p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -81,7 +84,7 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        
         {mobileMenuOpen && (
           <nav className="md:hidden py-4 border-t">
             <div className="flex flex-col gap-4">
@@ -113,6 +116,9 @@ export function Header() {
                 className="bg-blue-600 text-white border border-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-white hover:text-blue-600 font-medium transition-colors text-center"
               >
                 Área do Cliente
+              </a>
+              <a href="http://oficinadojuan.com.br/" target="_blank" rel="noopener noreferrer" className="mt-4 mx-auto flex items-center justify-center transition-transform hover:scale-105" title="Feito por Juan Rego">
+                <img src="/juan-logo.png" alt="Juan Rego Logo" className="h-10 w-10 rounded-full object-cover shadow-sm border border-gray-200" />
               </a>
             </div>
           </nav>

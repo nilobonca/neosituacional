@@ -1,4 +1,3 @@
-// Mock data para o site de administração condominial
 
 export interface BlogPost {
   id: number;

@@ -30,7 +30,7 @@ export function Blog() {
   return (
     <div className="py-16">
       <div className="container mx-auto px-4">
-        {/* Header */}
+        
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Central de Postagens do Blog
@@ -40,7 +40,7 @@ export function Blog() {
           </p>
         </div>
 
-        {/* Featured / Most Viewed Carousel Section */}
+        
         {!loading && posts.length > 0 && (
           <div className="mb-16">
             <div className="flex flex-col sm:flex-row items-center justify-between mb-6 pb-2 border-b border-gray-200 gap-4">
@@ -85,10 +85,10 @@ export function Blog() {
           </div>
         )}
 
-        {/* Filtros */}
+        
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Search */}
+            
             <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
@@ -100,7 +100,7 @@ export function Blog() {
               />
             </div>
 
-            {/* Category Filter */}
+            
             <div className="flex gap-2 flex-wrap justify-center">
               {categories.map((category) => (
                 <button
@@ -130,7 +130,7 @@ export function Blog() {
             Carregando artigos...
           </div>
         ) : (
-          /* Posts Grid */
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPosts.map((post) => (
               <article
@@ -182,7 +182,7 @@ export function Blog() {
           </div>
         )}
 
-        {/* No Results */}
+        
         {!loading && filteredPosts.length === 0 && !error && (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">

@@ -48,8 +48,6 @@ export function AdminSuppliers() {
 
   const toggleAcceptStatus = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'accepted' ? 'new' : 'accepted';
-    
-    // Atualiza otimisticamente a UI
     setSuppliers(suppliers.map(s => s.id === id ? { ...s, status: newStatus } : s));
     
     try {
@@ -59,7 +57,6 @@ export function AdminSuppliers() {
         .eq("id", id);
         
       if (error) {
-        // Reverte se der erro
         setSuppliers(suppliers.map(s => s.id === id ? { ...s, status: currentStatus } : s));
         console.error("Erro ao atualizar status:", error);
         alert("Não foi possível atualizar o status.");
@@ -151,7 +148,7 @@ export function AdminSuppliers() {
                 suppliers.map((supplier) => (
                   <tr key={supplier.id} className="hover:bg-gray-50/50 transition-colors">
                     
-                    {/* Coluna 1: Empresa e Logo */}
+                    
                     <td className="px-6 py-4 align-top">
                       <div className="flex items-start gap-4">
                         <a 
@@ -191,7 +188,7 @@ export function AdminSuppliers() {
                       </div>
                     </td>
 
-                    {/* Coluna 2: Contato */}
+                    
                     <td className="px-6 py-4 align-top">
                       <div className="text-sm text-gray-700 flex items-center gap-1.5 mb-2">
                         <Phone className="w-4 h-4 text-gray-400" />
@@ -211,7 +208,7 @@ export function AdminSuppliers() {
                       )}
                     </td>
 
-                    {/* Coluna 3: Serviços */}
+                    
                     <td className="px-6 py-4 align-top">
                       <div className="space-y-3">
                         <div>
@@ -234,7 +231,7 @@ export function AdminSuppliers() {
                       </div>
                     </td>
 
-                    {/* Coluna 4: Checkbox de Disputa */}
+                    
                     <td className="px-6 py-4 align-top text-center">
                       <div className="flex justify-center items-center h-full">
                         {supplier.compete_budgets ? (
@@ -251,7 +248,7 @@ export function AdminSuppliers() {
                       </div>
                     </td>
 
-                    {/* Coluna 5: Data e Ações */}
+                    
                     <td className="px-6 py-4 align-top whitespace-nowrap">
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-2 text-sm text-gray-600">

@@ -11,8 +11,6 @@ export function BlogPost() {
   
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Carregar o post e incrementar visualizações
   useEffect(() => {
     async function loadPostDetails() {
       if (!id) return;
@@ -21,7 +19,6 @@ export function BlogPost() {
       
       if (postData) {
         setPost(postData);
-        // Incrementa a view de forma assíncrona (nao precisa de await pro UI)
         incrementViews(id);
       }
       setLoading(false);
@@ -29,8 +26,6 @@ export function BlogPost() {
     
     loadPostDetails();
   }, [id]);
-
-  // Carregar todos os posts se não tivermos ainda para mostrar os "Outros artigos"
   useEffect(() => {
     if (posts.length === 0) {
       fetchPosts();
@@ -113,7 +108,7 @@ export function BlogPost() {
             <p className="text-xl text-gray-800 mb-8 leading-relaxed font-medium italic border-l-4 border-blue-600 pl-4 bg-gray-50 py-3 pr-3 rounded-r-lg">
               {post.excerpt}
             </p>
-            {/* Renderização do conteúdo em Markdown (Permite imagens no texto) */}
+            
             <div className="prose prose-lg prose-blue max-w-none prose-img:rounded-xl prose-img:shadow-md prose-headings:text-gray-900 prose-a:text-blue-600 hover:prose-a:text-blue-500">
               <ReactMarkdown
                 components={{
@@ -133,7 +128,7 @@ export function BlogPost() {
             </div>
           </div>
 
-          {/* Tags */}
+          
           {post.tags && post.tags.length > 0 && (
             <div className="mt-12 pt-6 border-t border-gray-100">
               <div className="flex items-center gap-2 mb-4 text-gray-700 font-medium">

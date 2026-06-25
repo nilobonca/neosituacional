@@ -5,7 +5,6 @@ import { supabase } from "../../lib/supabase";
 import { Toast } from "../components/Toast";
 
 export function Proposal() {
-  // Form State
   const [document, setDocument] = useState("");
   const [condoName, setCondoName] = useState("");
   const [representativeName, setRepresentativeName] = useState("");
@@ -15,27 +14,19 @@ export function Proposal() {
   const [apartments, setApartments] = useState("");
   const [houses, setHouses] = useState("");
   const [employees, setEmployees] = useState("");
-
-  // Files State
   const [files, setFiles] = useState<File[]>([]);
-  
-  // UI State
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Formatting helpers
   const formatDocument = (val: string) => {
     const raw = val.replace(/\D/g, '');
     if (raw.length <= 11) {
-      // CPF: 000.000.000-00
       return raw.replace(/(\d{3})(\d)/, '$1.$2')
                 .replace(/(\d{3})(\d)/, '$1.$2')
                 .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
     }
-    // CNPJ: 00.000.000/0000-00
     return raw.replace(/(\d{2})(\d)/, '$1.$2')
               .replace(/(\d{3})(\d)/, '$1.$2')
               .replace(/(\d{3})(\d)/, '$1/$2')
@@ -57,8 +48,6 @@ export function Proposal() {
     const selectedFiles = Array.from(e.target.files || []);
     
     if (selectedFiles.length === 0) return;
-
-    // Check total limit
     if (files.length + selectedFiles.length > 3) {
       setError("Você pode anexar no máximo 3 arquivos.");
       return;
@@ -81,8 +70,6 @@ export function Proposal() {
     }
 
     setFiles(prev => [...prev, ...validFiles]);
-    
-    // Reset input so the same file can be selected again if removed
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -128,8 +115,6 @@ export function Proposal() {
 
     try {
       const fileUrls: string[] = [];
-
-      // 1. Upload multiple files
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const fileExt = file.name.split('.').pop();
@@ -151,8 +136,6 @@ export function Proposal() {
 
         fileUrls.push(publicUrlData.publicUrl);
       }
-
-      // 2. Save data to database
       const { error: dbError } = await supabase
         .from("commercial_proposals")
         .insert([
@@ -236,7 +219,7 @@ export function Proposal() {
           <Toast message={error} onClose={() => setError(null)} />
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Sessão 1: Dados do Condomínio / Contato */}
+            
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">1. Dados Básicos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -300,7 +283,7 @@ export function Proposal() {
               </div>
             </div>
 
-            {/* Sessão 2: Estrutura */}
+            
             <div className="space-y-6 pt-4">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">2. Estrutura do Condomínio</h3>
               <p className="text-sm text-gray-500 mb-4">Atenção: É obrigatório informar a quantidade de casas OU apartamentos.</p>
@@ -360,7 +343,7 @@ export function Proposal() {
               </div>
             </div>
 
-            {/* Sessão 3: Arquivos */}
+            
             <div className="space-y-6 pt-4">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2">3. Arquivos para Análise</h3>
               <p className="font-medium text-blue-700 mb-2">Faça upload de 1 a 3 balancetes para análise. <span className="text-red-500 ml-0.5">*</span></p>
@@ -424,7 +407,7 @@ export function Proposal() {
               </div>
             </div>
 
-            {/* Envio */}
+            
             <div className="pt-8 mt-8 border-t border-gray-100">
               <button
                 type="submit"

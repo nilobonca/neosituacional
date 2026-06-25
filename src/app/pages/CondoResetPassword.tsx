@@ -11,12 +11,9 @@ export function CondoResetPassword() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  // Handle the hash fragment if supabase redirects with #access_token=...
   useEffect(() => {
     supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
-        // The user is authenticated temporarily to reset password
         console.log("Pronto para redefinir a senha.");
       }
     });
@@ -46,7 +43,6 @@ export function CondoResetPassword() {
     if (updateError) {
       setError("Erro ao redefinir a senha: " + updateError.message);
     } else {
-      // Opcional: fazer logout do usuário logo após a redefinição de senha para forçá-lo a logar com a nova
       await supabase.auth.signOut();
       
       setSuccess(true);

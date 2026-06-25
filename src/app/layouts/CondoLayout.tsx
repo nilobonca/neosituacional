@@ -24,8 +24,6 @@ export function CondoLayout() {
         navigate("/area-cliente/login");
         return;
       }
-
-      // Verifica se é síndico
       const { data: roleData } = await supabase
         .from("profiles")
         .select("role")

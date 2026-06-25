@@ -8,9 +8,7 @@ export function ClientArea() {
   });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Aqui seria feita a autenticação com o backend
-    alert("Funcionalidade de login será implementada em breve!");
+    e.preventDefault();    alert("Funcionalidade de login será implementada em breve!");
   };
 
   return (
@@ -107,7 +105,7 @@ export function ClientArea() {
             </div>
           </div>
 
-          {/* Features */}
+          
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold text-gray-900 mb-2">Portal Digital</h3>

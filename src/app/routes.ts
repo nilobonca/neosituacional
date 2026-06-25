@@ -47,8 +47,6 @@ export const router = createBrowserRouter([
       { path: "quem-somos", Component: About },
       { path: "feedback", Component: Feedback },
       { path: "area-cliente", Component: ClientArea },
-      
-      // Rotas do formulário interativo de múltipla escolha
       { path: "proposta", Component: Proposal },
       { path: "carreiras", Component: Careers },
       { path: "fornecedores", Component: Suppliers },

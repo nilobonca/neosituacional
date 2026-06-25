@@ -82,8 +82,6 @@ export function AdminBlogEdit() {
       setLoading(false);
     }
   };
-
-  // Categorias predefinidas, você pode alterar conforme quiser
   const categories = ["Geral", "Gestão Financeira", "Legislação", "Manutenção", "Gestão", "Tecnologia", "Segurança"];
 
   return (

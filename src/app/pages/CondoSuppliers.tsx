@@ -25,7 +25,6 @@ export function CondoSuppliers() {
   const fetchSuppliers = async () => {
     setLoading(true);
     try {
-      // O RLS já filtra automaticamente apenas status = 'accepted' para síndicos
       const { data, error } = await supabase
         .from("suppliers_applications")
         .select("*")
@@ -98,7 +97,7 @@ export function CondoSuppliers() {
                 suppliers.map((supplier) => (
                   <tr key={supplier.id} className="hover:bg-gray-50/50 transition-colors">
                     
-                    {/* Coluna 1: Empresa e Logo */}
+                    
                     <td className="px-6 py-4 align-top">
                       <div className="flex items-start gap-4">
                         <a 
@@ -133,7 +132,7 @@ export function CondoSuppliers() {
                       </div>
                     </td>
 
-                    {/* Coluna 2: Contato */}
+                    
                     <td className="px-6 py-4 align-top">
                       <div className="text-sm text-gray-700 flex items-center gap-1.5 mb-2">
                         <Phone className="w-4 h-4 text-gray-400" />
@@ -145,7 +144,7 @@ export function CondoSuppliers() {
                       </div>
                     </td>
 
-                    {/* Coluna 3: Serviços */}
+                    
                     <td className="px-6 py-4 align-top">
                       <div className="space-y-3">
                         <div>

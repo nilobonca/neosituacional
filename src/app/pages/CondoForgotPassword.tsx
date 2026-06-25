@@ -14,8 +14,6 @@ export function CondoForgotPassword() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    // Get the current URL base for the redirect
     const redirectTo = `${window.location.origin}/area-cliente/redefinir-senha`;
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {

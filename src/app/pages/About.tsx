@@ -44,7 +44,7 @@ export function About() {
 
   return (
     <div className="py-16">
-      {/* Hero Section */}
+      
       <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
@@ -59,7 +59,7 @@ export function About() {
         </div>
       </section>
 
-      {/* Nossa História */}
+      
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -88,7 +88,7 @@ export function About() {
         </div>
       </section>
 
-      {/* Missão, Visão e Valores */}
+      
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -112,7 +112,7 @@ export function About() {
         </div>
       </section>
 
-      {/* Nossa Equipe */}
+      
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
@@ -142,7 +142,7 @@ export function About() {
         </div>
       </section>
 
-      {/* Números */}
+      
       <section className="py-16 bg-blue-600 text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">

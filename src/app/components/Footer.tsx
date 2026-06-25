@@ -20,9 +20,7 @@ export function Footer() {
   useEffect(() => {
     async function loadSettings() {
       const data = await fetchFooterSettings();
-      if (data) {
-        // Merge with defaults to prevent entirely empty fields if DB string is badly formatted
-        setSettings(prev => ({ ...prev, ...data }));
+      if (data) {        setSettings(prev => ({ ...prev, ...data }));
       }
     }
     loadSettings();
@@ -36,7 +34,7 @@ export function Footer() {
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo e Descrição */}
+          
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Link to="/" className="inline-block">
@@ -69,7 +67,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Links Rápidos */}
+          
           <div>
             <h3 className="text-white font-semibold mb-4">Links Rápidos</h3>
             <ul className="space-y-2">
@@ -96,7 +94,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Serviços */}
+          
           <div>
             <h3 className="text-white font-semibold mb-4">Serviços</h3>
             <ul className="space-y-2 text-sm">
@@ -113,7 +111,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contato */}
+          
           {settings.showContactInfo !== false && (
             <div>
               <h3 className="text-white font-semibold mb-4">Contato</h3>
@@ -154,8 +152,12 @@ export function Footer() {
           )}
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 gap-4">
           <p>&copy; 2026 SITUACIONAL. Todos os direitos reservados.</p>
+          <a href="http://oficinadojuan.com.br/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title="Feito por Juan Rego">
+            <span className="text-sm">Feito por Juan Rego</span>
+            <img src="/juan-logo.png" alt="Juan Rego Logo" className="h-7 w-7 rounded-full object-cover border border-gray-600" />
+          </a>
         </div>
       </div>
     </footer>
