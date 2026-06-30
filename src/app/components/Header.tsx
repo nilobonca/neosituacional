@@ -24,9 +24,9 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="SITUACIONAL Logo" className="h-10 w-auto" />
-            <span className="font-bold text-xl text-situational-blue font-montserrat">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logo} alt="SITUACIONAL Logo" className="h-12 w-auto" />
+            <span className="font-bold text-2xl md:text-3xl text-situational-blue font-montserrat mt-1">
               SITUACIONAL
             </span>
           </Link>
@@ -45,10 +45,8 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            
-            <a href="http://oficinadojuan.com.br/" target="_blank" rel="noopener noreferrer" className="mx-2 flex items-center justify-center transition-transform hover:scale-105" title="Feito por Juan Rego">
-              <img src="/juan-logo.png" alt="Juan Rego Logo" className="h-8 w-8 rounded-full object-cover shadow-sm border border-gray-200" />
-            </a>
+
+
 
 
             <Link
@@ -116,9 +114,6 @@ export function Header() {
                 className="bg-blue-600 text-white border border-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-white hover:text-blue-600 font-medium transition-colors text-center"
               >
                 Área do Cliente
-              </a>
-              <a href="http://oficinadojuan.com.br/" target="_blank" rel="noopener noreferrer" className="mt-4 mx-auto flex items-center justify-center transition-transform hover:scale-105" title="Feito por Juan Rego">
-                <img src="/juan-logo.png" alt="Juan Rego Logo" className="h-10 w-10 rounded-full object-cover shadow-sm border border-gray-200" />
               </a>
             </div>
           </nav>
