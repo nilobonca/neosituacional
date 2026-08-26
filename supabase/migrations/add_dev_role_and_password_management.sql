@@ -1,5 +1,5 @@
 -- =========================================================================
--- Migração: Criação da Role DEV e Funções de Gestão e Redefinição de Senhas
+-- Migração: Criação da Role DEV e Funções de Gestão, Redefinição e Exclusão de Senhas
 -- =========================================================================
 
 -- 1. Habilitar extensões necessárias
@@ -185,5 +185,50 @@ BEGIN
 END;
 $$;
 
--- 8. Recarregar o schema do PostgREST
+-- =========================================================================
+-- 8. RPC: dev_delete_user (Exclusão Completa de Contas do Sistema)
+-- Permite ao DEV excluir qualquer usuário ou admin
+-- =========================================================================
+CREATE OR REPLACE FUNCTION public.dev_delete_user(target_user_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+    v_is_dev BOOLEAN;
+    v_current_user_id UUID := auth.uid();
+BEGIN
+    -- Validar se quem está chamando é DEV
+    SELECT (role = 'dev') INTO v_is_dev FROM public.profiles WHERE id = v_current_user_id;
+    IF v_is_dev IS NOT TRUE THEN
+        RAISE EXCEPTION 'Acesso negado: Apenas usuários com cargo DEV podem excluir contas do sistema.';
+    END IF;
+
+    -- Impedir auto-exclusão
+    IF target_user_id = v_current_user_id THEN
+        RAISE EXCEPTION 'Você não pode excluir sua própria conta enquanto estiver logado nela.';
+    END IF;
+
+    IF target_user_id IS NULL THEN
+        RAISE EXCEPTION 'ID de usuário não informado.';
+    END IF;
+
+    -- Excluir da tabela auth.users (as chaves estrangeiras com ON DELETE CASCADE excluirão profiles, user_roles, etc.)
+    DELETE FROM auth.users WHERE id = target_user_id;
+
+    -- Garantir exclusão caso haja registros órfãos
+    DELETE FROM public.profiles WHERE id = target_user_id;
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_roles') THEN
+        DELETE FROM public.user_roles WHERE user_id = target_user_id;
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'message', 'Usuário e credenciais excluídos com sucesso!'
+    );
+END;
+$$;
+
+-- 9. Recarregar o schema do PostgREST
 NOTIFY pgrst, 'reload schema';

@@ -18,7 +18,9 @@ import {
   Mail,
   ShieldCheck,
   Calendar,
-  Sparkles
+  Sparkles,
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -51,6 +53,10 @@ export function AdminDevUsers() {
   const [roleModalUser, setRoleModalUser] = useState<SystemUser | null>(null);
   const [selectedNewRole, setSelectedNewRole] = useState<string>("sindico");
   const [roleUpdating, setRoleUpdating] = useState(false);
+
+  // Modal de Exclusão de Usuário
+  const [deleteModalUser, setDeleteModalUser] = useState<SystemUser | null>(null);
+  const [userDeleting, setUserDeleting] = useState(false);
 
   // Estado de envio de link de recuperação
   const [sendingResetForEmail, setSendingResetForEmail] = useState<string | null>(null);
@@ -153,6 +159,31 @@ export function AdminDevUsers() {
       setError(err.message || "Erro ao atualizar cargo do usuário.");
     } finally {
       setRoleUpdating(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteModalUser) return;
+
+    try {
+      setUserDeleting(true);
+      setError(null);
+      setSuccessMsg(null);
+
+      const { data, error: rpcError } = await supabase.rpc("dev_delete_user", {
+        target_user_id: deleteModalUser.id
+      });
+
+      if (rpcError) throw rpcError;
+
+      setSuccessMsg(`Usuário ${deleteModalUser.email} e todos os seus dados foram excluídos com sucesso!`);
+      setDeleteModalUser(null);
+      fetchUsers();
+    } catch (err: any) {
+      console.error("Erro ao excluir usuário:", err);
+      setError(err.message || "Erro ao excluir usuário.");
+    } finally {
+      setUserDeleting(false);
     }
   };
 
@@ -398,6 +429,15 @@ export function AdminDevUsers() {
                           <Shield className="w-4 h-4" />
                         </button>
 
+                        {/* Botão 4: Excluir Conta */}
+                        <button
+                          onClick={() => setDeleteModalUser(user)}
+                          title="Excluir usuário e credenciais do sistema"
+                          className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+
                       </div>
                     </td>
                   </tr>
@@ -587,6 +627,76 @@ export function AdminDevUsers() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: EXCLUIR USUÁRIO */}
+      {deleteModalUser && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-red-100">
+            <div className="px-6 py-5 bg-gradient-to-r from-rose-700 to-red-800 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-white/10 rounded-xl">
+                  <AlertTriangle className="w-5 h-5 text-rose-200" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base font-montserrat">Excluir Conta do Sistema</h3>
+                  <p className="text-xs text-rose-200">Ação Irreversível</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setDeleteModalUser(null)}
+                className="text-white/70 hover:text-white p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="p-3.5 bg-rose-50 border border-rose-100 rounded-2xl text-xs text-rose-900">
+                <p className="font-bold text-sm text-gray-900">{deleteModalUser.full_name || "Usuário"}</p>
+                <p className="font-mono text-gray-600 mt-0.5">{deleteModalUser.email}</p>
+                <span className="inline-block mt-2 px-2 py-0.5 bg-rose-200/60 text-rose-900 font-semibold rounded text-[11px] uppercase">
+                  Cargo Atual: {deleteModalUser.role}
+                </span>
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <span>
+                  Tem certeza que deseja excluir esta conta? O acesso será revogado permanentemente e todas as credenciais no Supabase Auth e perfis serão removidos.
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalUser(null)}
+                  className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteUser}
+                  disabled={userDeleting}
+                  className="px-5 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {userDeleting ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      Excluindo...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Excluir Definitivamente
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
