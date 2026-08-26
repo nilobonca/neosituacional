@@ -26,6 +26,8 @@ import { AdminCareers } from "./pages/AdminCareers";
 import { AdminProposals } from "./pages/AdminProposals";
 import { AdminSuppliers } from "./pages/AdminSuppliers";
 import { AdminLogin } from "./pages/AdminLogin";
+import { AdminInvites } from "./pages/AdminInvites";
+import { AdminAcceptInvite } from "./pages/AdminAcceptInvite";
 
 import { CondoLogin } from "./pages/CondoLogin";
 import { CondoRegister } from "./pages/CondoRegister";
@@ -59,6 +61,10 @@ export const router = createBrowserRouter([
     Component: AdminLogin,
   },
   {
+    path: "/admin/convite",
+    Component: AdminAcceptInvite,
+  },
+  {
     path: "/admin",
     Component: AdminLayout,
     children: [
@@ -81,6 +87,7 @@ export const router = createBrowserRouter([
       { path: "careers", Component: AdminCareers },
       { path: "proposals", Component: AdminProposals },
       { path: "suppliers", Component: AdminSuppliers },
+      { path: "invites", Component: AdminInvites },
       { path: "*", Component: NotFound }
     ]
   },

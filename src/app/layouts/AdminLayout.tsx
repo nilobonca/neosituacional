@@ -15,7 +15,8 @@ import {
   FileSignature,
   Truck,
   Building2,
-  Globe
+  Globe,
+  UserPlus
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -83,6 +84,7 @@ export function AdminLayout() {
     { path: "/admin/carousel", icon: <ImageIcon size={20} />, label: "Carrossel" },
     { path: "/admin/clients", icon: <Users size={20} />, label: "Clientes & Parceiros" },
     { path: "/admin/testimonials", icon: <MessageSquare size={20} />, label: "Depoimentos" },
+    { path: "/admin/invites", icon: <UserPlus size={20} />, label: "Convites de Admin" },
     { path: "/admin/settings", icon: <Settings size={20} />, label: "Configurações" },
   ];
 
