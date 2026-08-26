@@ -197,6 +197,127 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.accept_admin_invite(
+    token_jwt TEXT,
+    target_user_id UUID DEFAULT NULL,
+    target_full_name TEXT DEFAULT '',
+    user_password TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, auth
+AS $$
+DECLARE
+    v_invite RECORD;
+    v_updated_rows INTEGER;
+    v_final_user_id UUID := target_user_id;
+    v_hashed_password TEXT;
+BEGIN
+    IF token_jwt IS NULL THEN
+        RAISE EXCEPTION 'Parâmetros obrigatórios ausentes: token_jwt.';
+    END IF;
+
+    -- 1. Buscar convite com trava de concorrência (FOR UPDATE)
+    SELECT * INTO v_invite 
+    FROM public.admin_invites 
+    WHERE token = token_jwt
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Convite inválido ou não encontrado.';
+    END IF;
+
+    IF v_invite.status = 'used' THEN
+        RAISE EXCEPTION 'Este convite já foi utilizado anteriormente.';
+    END IF;
+
+    IF v_invite.status = 'revoked' THEN
+        RAISE EXCEPTION 'Este convite foi revogado pelo administrador.';
+    END IF;
+
+    IF v_invite.expires_at < timezone('utc'::text, now()) THEN
+        UPDATE public.admin_invites SET status = 'expired' WHERE id = v_invite.id;
+        RAISE EXCEPTION 'Este convite expirou.';
+    END IF;
+
+    -- 2. Localizar o ID do usuário pelo email caso target_user_id seja nulo
+    IF v_final_user_id IS NULL THEN
+        SELECT id INTO v_final_user_id FROM auth.users WHERE lower(email) = lower(v_invite.email);
+    END IF;
+
+    IF v_final_user_id IS NULL THEN
+        RAISE EXCEPTION 'Usuário não localizado no sistema de autenticação.';
+    END IF;
+
+    -- 3. Consumir o token de forma atômica (One-Time Use Enforcement)
+    UPDATE public.admin_invites
+    SET 
+        status = 'used',
+        used_at = timezone('utc'::text, now()),
+        used_by = v_final_user_id
+    WHERE id = v_invite.id AND status = 'pending';
+
+    GET DIAGNOSTICS v_updated_rows = ROW_COUNT;
+    IF v_updated_rows = 0 THEN
+        RAISE EXCEPTION 'Falha ao processar convite: o token já foi consumido por outra requisição.';
+    END IF;
+
+    -- 4. Atualizar a senha (se informada) e confirmar o e-mail em auth.users
+    IF user_password IS NOT NULL AND length(trim(user_password)) >= 6 THEN
+        BEGIN
+            v_hashed_password := extensions.crypt(user_password, extensions.gen_salt('bf', 10));
+        EXCEPTION WHEN OTHERS THEN
+            v_hashed_password := crypt(user_password, gen_salt('bf', 10));
+        END;
+
+        UPDATE auth.users
+        SET 
+            encrypted_password = v_hashed_password,
+            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
+            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = v_final_user_id;
+    ELSE
+        UPDATE auth.users
+        SET 
+            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
+            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = v_final_user_id;
+    END IF;
+
+    -- 5. Atualizar ou Inserir o perfil do usuário como 'admin'
+    INSERT INTO public.profiles (id, email, full_name, role, created_at)
+    VALUES (
+        v_final_user_id,
+        v_invite.email,
+        coalesce(target_full_name, ''),
+        'admin',
+        timezone('utc'::text, now())
+    )
+    ON CONFLICT (id) DO UPDATE SET
+        role = 'admin',
+        full_name = CASE 
+            WHEN trim(coalesce(EXCLUDED.full_name, '')) <> '' THEN EXCLUDED.full_name 
+            ELSE public.profiles.full_name 
+        END;
+
+    -- Se houver a tabela user_roles legado, manter sincronizado por compatibilidade
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_roles') THEN
+        INSERT INTO public.user_roles (user_id, role)
+        VALUES (v_final_user_id, 'admin')
+        ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
+    END IF;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'message', 'Convite consumido com sucesso. Conta de administrador ativada!',
+        'email', v_invite.email
+    );
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.revoke_admin_invite(invite_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -207,7 +328,6 @@ DECLARE
     v_admin_id UUID := auth.uid();
     v_is_authorized BOOLEAN;
 BEGIN
-    -- Permitir tanto ADMIN quanto DEV
     SELECT (role IN ('admin', 'dev')) INTO v_is_authorized FROM public.profiles WHERE id = v_admin_id;
     IF v_admin_id IS NULL OR v_is_authorized IS NOT TRUE THEN
         RAISE EXCEPTION 'Apenas administradores e desenvolvedores podem revogar convites.';

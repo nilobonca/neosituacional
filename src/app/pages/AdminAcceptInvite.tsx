@@ -95,9 +95,9 @@ export function AdminAcceptInvite() {
     try {
       setSubmitting(true);
 
-      // 1. Criar o usuário no Supabase Auth
+      // 1. Tentar criar o usuário no Supabase Auth
       let userId: string | null = null;
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      const { data: signUpData } = await supabase.auth.signUp({
         email: inviteEmail,
         password: password,
         options: {
@@ -107,56 +107,36 @@ export function AdminAcceptInvite() {
         }
       });
 
-      if (signUpError) {
-        // Caso o usuário já exista no Auth, tentar autenticar com a senha informada
-        if (signUpError.message.includes("User already registered") || signUpError.status === 400) {
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: inviteEmail,
-            password: password
-          });
-
-          if (signInError) {
-            throw new Error("Este e-mail já possui cadastro. Faça login ou utilize a senha já cadastrada.");
-          }
-          userId = signInData.user?.id || null;
-        } else {
-          throw signUpError;
-        }
-      } else {
-        userId = signUpData.user?.id || null;
+      if (signUpData?.user?.id) {
+        userId = signUpData.user.id;
       }
 
-      if (!userId) {
-        // Tentar obter sessão atual
-        const { data: sessionData } = await supabase.auth.getSession();
-        userId = sessionData.session?.user.id || null;
-      }
-
-      if (!userId) {
-        throw new Error("Não foi possível identificar o usuário criado.");
-      }
-
-      // 2. Chamar RPC atômica para consumir o convite (One-Time Use) e promover para Admin
+      // 2. Chamar RPC atômica que consome o convite, confirma o e-mail, define a senha e eleva para 'admin'
       const { data: acceptData, error: acceptError } = await supabase.rpc("accept_admin_invite", {
         token_jwt: token,
         target_user_id: userId,
-        target_full_name: fullName.trim()
+        target_full_name: fullName.trim(),
+        user_password: password
       });
 
       if (acceptError) {
         throw acceptError;
       }
 
-      // 3. Garantir que o usuário está logado
-      await supabase.auth.signInWithPassword({
+      // 3. Fazer login imediato com a senha configurada
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: inviteEmail,
         password: password
       });
 
+      if (signInError) {
+        console.warn("Aviso na autenticação pós-ativação:", signInError);
+      }
+
       setSuccess(true);
       setTimeout(() => {
         navigate("/admin");
-      }, 2500);
+      }, 2000);
 
     } catch (err: any) {
       console.error("Erro ao aceitar convite:", err);

@@ -27,44 +27,26 @@ CREATE INDEX IF NOT EXISTS idx_admin_invites_status ON public.admin_invites(stat
 ALTER TABLE public.admin_invites ENABLE ROW LEVEL SECURITY;
 
 -- 4. Políticas de RLS
--- Apenas administradores autenticados podem ver todos os convites
 DROP POLICY IF EXISTS "Admins podem visualizar convites" ON public.admin_invites;
 CREATE POLICY "Admins podem visualizar convites" 
 ON public.admin_invites
 FOR SELECT 
 TO authenticated 
-USING (
-    EXISTS (
-        SELECT 1 FROM public.profiles 
-        WHERE id = auth.uid() AND role = 'admin'
-    )
-);
+USING ( public.is_admin() );
 
--- Apenas administradores podem inserir novos convites
 DROP POLICY IF EXISTS "Admins podem criar convites" ON public.admin_invites;
 CREATE POLICY "Admins podem criar convites" 
 ON public.admin_invites
 FOR INSERT 
 TO authenticated 
-WITH CHECK (
-    EXISTS (
-        SELECT 1 FROM public.profiles 
-        WHERE id = auth.uid() AND role = 'admin'
-    )
-);
+WITH CHECK ( public.is_admin() );
 
--- Apenas administradores podem atualizar convites (ex: revogar)
 DROP POLICY IF EXISTS "Admins podem atualizar convites" ON public.admin_invites;
 CREATE POLICY "Admins podem atualizar convites" 
 ON public.admin_invites
 FOR UPDATE 
 TO authenticated 
-USING (
-    EXISTS (
-        SELECT 1 FROM public.profiles 
-        WHERE id = auth.uid() AND role = 'admin'
-    )
-);
+USING ( public.is_admin() );
 
 -- =========================================================================
 -- 5. Funções Auxiliares para Criptografia e Geração de JWT no PostgreSQL
@@ -99,13 +81,11 @@ DECLARE
     v_signature_raw BYTEA;
     v_signature_b64 TEXT;
 BEGIN
-    -- Header padrão JWT HS256
     v_header := jsonb_build_object(
         'alg', 'HS256',
         'typ', 'JWT'
     );
     
-    -- Payload do convite com claims padrão e personalizadas
     v_payload := jsonb_build_object(
         'jti', p_invite_id::text,
         'email', lower(trim(p_email)),
@@ -119,7 +99,6 @@ BEGIN
     
     v_signature_input := v_header_b64 || '.' || v_payload_b64;
     
-    -- Executar hmac com tipagem explícita 'sha256'::text
     BEGIN
         v_signature_raw := extensions.hmac(v_signature_input::text, v_secret::text, 'sha256'::text);
     EXCEPTION WHEN OTHERS THEN
@@ -146,37 +125,32 @@ SET search_path = public, extensions, auth
 AS $$
 DECLARE
     v_admin_id UUID := auth.uid();
-    v_is_admin BOOLEAN;
+    v_is_authorized BOOLEAN;
     v_invite_id UUID := gen_random_uuid();
     v_expires_at TIMESTAMP WITH TIME ZONE;
     v_token TEXT;
     v_clean_email TEXT := lower(trim(target_email));
 BEGIN
-    -- Validar se o executor é admin
-    SELECT (role = 'admin') INTO v_is_admin FROM public.profiles WHERE id = v_admin_id;
-    IF v_admin_id IS NULL OR v_is_admin IS NOT TRUE THEN
-        RAISE EXCEPTION 'Acesso não autorizado: apenas administradores podem gerar convites.';
+    SELECT (role IN ('admin', 'dev')) INTO v_is_authorized FROM public.profiles WHERE id = v_admin_id;
+    IF v_admin_id IS NULL OR v_is_authorized IS NOT TRUE THEN
+        RAISE EXCEPTION 'Acesso não autorizado: apenas administradores e desenvolvedores podem gerar convites.';
     END IF;
 
     IF v_clean_email IS NULL OR v_clean_email = '' OR v_clean_email NOT LIKE '%@%' THEN
         RAISE EXCEPTION 'E-mail informado é inválido.';
     END IF;
 
-    -- Definir tempo de expiração (padrão 48h caso valor inválido seja enviado)
     IF hours_valid IS NULL OR hours_valid <= 0 THEN
         hours_valid := 48;
     END IF;
     v_expires_at := timezone('utc'::text, now()) + (hours_valid || ' hours')::INTERVAL;
 
-    -- Cancelar convites pendentes anteriores para este mesmo e-mail para evitar múltiplos links soltos
     UPDATE public.admin_invites
     SET status = 'revoked'
     WHERE email = v_clean_email AND status = 'pending';
 
-    -- Gerar o token JWT assinado
     v_token := public.generate_jwt_token(v_invite_id, v_clean_email, v_expires_at);
 
-    -- Gravar convite no banco de dados
     INSERT INTO public.admin_invites (
         id,
         email,
@@ -225,7 +199,6 @@ BEGIN
         );
     END IF;
 
-    -- Buscar o convite pelo token no banco
     SELECT * INTO v_invite 
     FROM public.admin_invites 
     WHERE token = token_jwt;
@@ -237,7 +210,6 @@ BEGIN
         );
     END IF;
 
-    -- Verificar se já foi utilizado
     IF v_invite.status = 'used' THEN
         RETURN jsonb_build_object(
             'valid', false,
@@ -245,7 +217,6 @@ BEGIN
         );
     END IF;
 
-    -- Verificar se foi revogado
     IF v_invite.status = 'revoked' THEN
         RETURN jsonb_build_object(
             'valid', false,
@@ -253,9 +224,7 @@ BEGIN
         );
     END IF;
 
-    -- Verificar expiração
     IF v_invite.expires_at < timezone('utc'::text, now()) THEN
-        -- Atualizar status para expired
         UPDATE public.admin_invites SET status = 'expired' WHERE id = v_invite.id;
         RETURN jsonb_build_object(
             'valid', false,
@@ -263,7 +232,6 @@ BEGIN
         );
     END IF;
 
-    -- Se chegou aqui, o convite é 100% válido e pendente de uso
     RETURN jsonb_build_object(
         'valid', true,
         'email', v_invite.email,
@@ -274,12 +242,13 @@ $$;
 
 -- =========================================================================
 -- 8. Função RPC: Aceitar e Consumir Convite de Forma Atômica (accept_admin_invite)
--- Garante o uso único: muda status para 'used', vincula usuário e eleva role para 'admin'
+-- Garante uso único, confirma e-mail, grava senha com hash bcrypt e define role 'admin'
 -- =========================================================================
 CREATE OR REPLACE FUNCTION public.accept_admin_invite(
     token_jwt TEXT,
-    target_user_id UUID,
-    target_full_name TEXT DEFAULT ''
+    target_user_id UUID DEFAULT NULL,
+    target_full_name TEXT DEFAULT '',
+    user_password TEXT DEFAULT NULL
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -289,12 +258,14 @@ AS $$
 DECLARE
     v_invite RECORD;
     v_updated_rows INTEGER;
+    v_final_user_id UUID := target_user_id;
+    v_hashed_password TEXT;
 BEGIN
-    IF token_jwt IS NULL OR target_user_id IS NULL THEN
-        RAISE EXCEPTION 'Parâmetros obrigatórios ausentes.';
+    IF token_jwt IS NULL THEN
+        RAISE EXCEPTION 'Parâmetros obrigatórios ausentes: token_jwt.';
     END IF;
 
-    -- 1. Buscar o convite e bloquear a linha para evitar concorrência simultânea (FOR UPDATE)
+    -- 1. Buscar convite com trava de concorrência (FOR UPDATE)
     SELECT * INTO v_invite 
     FROM public.admin_invites 
     WHERE token = token_jwt
@@ -309,7 +280,7 @@ BEGIN
     END IF;
 
     IF v_invite.status = 'revoked' THEN
-        RAISE EXCEPTION 'Este convite foi revogado.';
+        RAISE EXCEPTION 'Este convite foi revogado pelo administrador.';
     END IF;
 
     IF v_invite.expires_at < timezone('utc'::text, now()) THEN
@@ -317,12 +288,21 @@ BEGIN
         RAISE EXCEPTION 'Este convite expirou.';
     END IF;
 
-    -- 2. Consumir o token de forma atômica (One-Time Use Enforcement)
+    -- 2. Localizar o ID do usuário pelo email caso target_user_id seja nulo
+    IF v_final_user_id IS NULL THEN
+        SELECT id INTO v_final_user_id FROM auth.users WHERE lower(email) = lower(v_invite.email);
+    END IF;
+
+    IF v_final_user_id IS NULL THEN
+        RAISE EXCEPTION 'Usuário não localizado no sistema de autenticação.';
+    END IF;
+
+    -- 3. Consumir o token de forma atômica (One-Time Use Enforcement)
     UPDATE public.admin_invites
     SET 
         status = 'used',
         used_at = timezone('utc'::text, now()),
-        used_by = target_user_id
+        used_by = v_final_user_id
     WHERE id = v_invite.id AND status = 'pending';
 
     GET DIAGNOSTICS v_updated_rows = ROW_COUNT;
@@ -330,10 +310,34 @@ BEGIN
         RAISE EXCEPTION 'Falha ao processar convite: o token já foi consumido por outra requisição.';
     END IF;
 
-    -- 3. Atualizar ou Inserir o perfil do usuário como 'admin'
+    -- 4. Atualizar a senha (se informada) e confirmar o e-mail em auth.users
+    IF user_password IS NOT NULL AND length(trim(user_password)) >= 6 THEN
+        BEGIN
+            v_hashed_password := extensions.crypt(user_password, extensions.gen_salt('bf', 10));
+        EXCEPTION WHEN OTHERS THEN
+            v_hashed_password := crypt(user_password, gen_salt('bf', 10));
+        END;
+
+        UPDATE auth.users
+        SET 
+            encrypted_password = v_hashed_password,
+            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
+            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = v_final_user_id;
+    ELSE
+        UPDATE auth.users
+        SET 
+            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
+            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = v_final_user_id;
+    END IF;
+
+    -- 5. Atualizar ou Inserir o perfil do usuário como 'admin'
     INSERT INTO public.profiles (id, email, full_name, role, created_at)
     VALUES (
-        target_user_id,
+        v_final_user_id,
         v_invite.email,
         coalesce(target_full_name, ''),
         'admin',
@@ -349,7 +353,7 @@ BEGIN
     -- Se houver a tabela user_roles legado, manter sincronizado por compatibilidade
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_roles') THEN
         INSERT INTO public.user_roles (user_id, role)
-        VALUES (target_user_id, 'admin')
+        VALUES (v_final_user_id, 'admin')
         ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
     END IF;
 
@@ -372,11 +376,11 @@ SET search_path = public, extensions, auth
 AS $$
 DECLARE
     v_admin_id UUID := auth.uid();
-    v_is_admin BOOLEAN;
+    v_is_authorized BOOLEAN;
 BEGIN
-    SELECT (role = 'admin') INTO v_is_admin FROM public.profiles WHERE id = v_admin_id;
-    IF v_admin_id IS NULL OR v_is_admin IS NOT TRUE THEN
-        RAISE EXCEPTION 'Apenas administradores podem revogar convites.';
+    SELECT (role IN ('admin', 'dev')) INTO v_is_authorized FROM public.profiles WHERE id = v_admin_id;
+    IF v_admin_id IS NULL OR v_is_authorized IS NOT TRUE THEN
+        RAISE EXCEPTION 'Apenas administradores e desenvolvedores podem revogar convites.';
     END IF;
 
     UPDATE public.admin_invites
