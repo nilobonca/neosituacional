@@ -2,7 +2,7 @@
 -- Migração: Sistema de Convites de Administrador com JWT de Uso Único
 -- =========================================================================
 
--- 1. Habilitar a extensão pgcrypto se ainda não estiver habilitada
+-- 1. Habilitar a extensão pgcrypto (no schema extensions ou public)
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 2. Tabela para registrar e controlar o ciclo de vida dos convites
@@ -70,7 +70,7 @@ USING (
 -- 5. Funções Auxiliares para Criptografia e Geração de JWT no PostgreSQL
 -- =========================================================================
 
--- Função para converter texto/bytes em Base64 URL-Safe (padrão RFC 7515 / RFC 7519)
+-- Função para converter bytes em Base64 URL-Safe (padrão RFC 7515 / RFC 7519)
 CREATE OR REPLACE FUNCTION public.base64url_encode(input_bytes BYTEA)
 RETURNS TEXT AS $$
 BEGIN
@@ -84,7 +84,11 @@ CREATE OR REPLACE FUNCTION public.generate_jwt_token(
     p_email TEXT,
     p_expires_at TIMESTAMP WITH TIME ZONE
 )
-RETURNS TEXT AS $$
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, auth
+AS $$
 DECLARE
     v_secret TEXT := 'situacional_admin_invite_secret_key_2026_super_secure'; -- Segredo de assinatura
     v_header JSONB;
@@ -114,12 +118,19 @@ BEGIN
     v_payload_b64 := public.base64url_encode(convert_to(v_payload::text, 'UTF8'));
     
     v_signature_input := v_header_b64 || '.' || v_payload_b64;
-    v_signature_raw := hmac(convert_to(v_signature_input, 'UTF8'), convert_to(v_secret, 'UTF8'), 'sha256');
+    
+    -- Executar hmac com tipagem explícita 'sha256'::text
+    BEGIN
+        v_signature_raw := extensions.hmac(v_signature_input::text, v_secret::text, 'sha256'::text);
+    EXCEPTION WHEN OTHERS THEN
+        v_signature_raw := hmac(v_signature_input::text, v_secret::text, 'sha256'::text);
+    END;
+    
     v_signature_b64 := public.base64url_encode(v_signature_raw);
     
     RETURN v_signature_input || '.' || v_signature_b64;
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$;
 
 -- =========================================================================
 -- 6. Função RPC: Criar Convite de Admin (create_admin_invite)
@@ -131,7 +142,7 @@ CREATE OR REPLACE FUNCTION public.create_admin_invite(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, auth
+SET search_path = public, extensions, auth
 AS $$
 DECLARE
     v_admin_id UUID := auth.uid();
@@ -143,7 +154,7 @@ DECLARE
 BEGIN
     -- Validar se o executor é admin
     SELECT (role = 'admin') INTO v_is_admin FROM public.profiles WHERE id = v_admin_id;
-    IF v_is_admin IS NOT TRUE THEN
+    IF v_admin_id IS NULL OR v_is_admin IS NOT TRUE THEN
         RAISE EXCEPTION 'Acesso não autorizado: apenas administradores podem gerar convites.';
     END IF;
 
@@ -202,7 +213,7 @@ CREATE OR REPLACE FUNCTION public.validate_admin_invite(token_jwt TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, auth
+SET search_path = public, extensions, auth
 AS $$
 DECLARE
     v_invite RECORD;
@@ -273,7 +284,7 @@ CREATE OR REPLACE FUNCTION public.accept_admin_invite(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, auth
+SET search_path = public, extensions, auth
 AS $$
 DECLARE
     v_invite RECORD;
@@ -357,14 +368,14 @@ CREATE OR REPLACE FUNCTION public.revoke_admin_invite(invite_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, auth
+SET search_path = public, extensions, auth
 AS $$
 DECLARE
     v_admin_id UUID := auth.uid();
     v_is_admin BOOLEAN;
 BEGIN
     SELECT (role = 'admin') INTO v_is_admin FROM public.profiles WHERE id = v_admin_id;
-    IF v_is_admin IS NOT TRUE THEN
+    IF v_admin_id IS NULL OR v_is_admin IS NOT TRUE THEN
         RAISE EXCEPTION 'Apenas administradores podem revogar convites.';
     END IF;
 
