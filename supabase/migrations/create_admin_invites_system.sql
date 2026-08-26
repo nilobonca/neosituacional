@@ -183,7 +183,6 @@ $$;
 
 -- =========================================================================
 -- 7. Função RPC: Validar Convite (validate_admin_invite)
--- Usada pela página pública /admin/convite?token=... antes do cadastro
 -- =========================================================================
 DROP FUNCTION IF EXISTS public.validate_admin_invite(TEXT);
 DROP FUNCTION IF EXISTS public.validate_admin_invite;
@@ -307,6 +306,7 @@ BEGIN
     END IF;
 
     -- 3. Confirmar o e-mail em auth.users e sincronizar senha
+    -- Nota: Não atualizamos "confirmed_at" diretamente pois é uma coluna gerada (GENERATED ALWAYS) no Supabase
     IF user_password IS NOT NULL AND length(trim(user_password)) >= 6 THEN
         BEGIN
             v_hashed_password := extensions.crypt(user_password, extensions.gen_salt('bf', 10));
@@ -318,7 +318,6 @@ BEGIN
         SET 
             encrypted_password = v_hashed_password,
             email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
-            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
             raw_user_meta_data = jsonb_build_object('full_name', coalesce(target_full_name, '')),
             updated_at = timezone('utc'::text, now())
         WHERE id = target_user_id;
@@ -326,7 +325,6 @@ BEGIN
         UPDATE auth.users
         SET 
             email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
-            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
             raw_user_meta_data = jsonb_build_object('full_name', coalesce(target_full_name, '')),
             updated_at = timezone('utc'::text, now())
         WHERE id = target_user_id;
