@@ -109,13 +109,23 @@ export function AdminAcceptInvite() {
       }
 
       // 2. Fazer login com a conta ativada
+      const cleanEmail = inviteEmail.trim().toLowerCase();
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: inviteEmail,
+        email: cleanEmail,
         password: password
       });
 
       if (signInError) {
         console.warn("Aviso no auto-login pós-ativação:", signInError);
+        // Tentar fallback com email original
+        const { error: secondAttempt } = await supabase.auth.signInWithPassword({
+          email: inviteEmail,
+          password: password
+        });
+
+        if (secondAttempt) {
+          console.error("Falha na segunda tentativa de login:", secondAttempt);
+        }
       }
 
       setSuccess(true);
