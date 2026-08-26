@@ -242,7 +242,7 @@ $$;
 
 -- =========================================================================
 -- 8. Função RPC: Aceitar e Consumir Convite de Forma Atômica (accept_admin_invite)
--- Garante uso único, confirma e-mail, grava senha com hash bcrypt e define role 'admin'
+-- Cria ou atualiza a conta em auth.users, confirma o email, grava a senha com bcrypt e define role 'admin'
 -- =========================================================================
 CREATE OR REPLACE FUNCTION public.accept_admin_invite(
     token_jwt TEXT,
@@ -259,7 +259,8 @@ DECLARE
     v_invite RECORD;
     v_updated_rows INTEGER;
     v_final_user_id UUID := target_user_id;
-    v_hashed_password TEXT;
+    v_clean_email TEXT;
+    v_hashed_password TEXT := NULL;
 BEGIN
     IF token_jwt IS NULL THEN
         RAISE EXCEPTION 'Parâmetros obrigatórios ausentes: token_jwt.';
@@ -288,16 +289,100 @@ BEGIN
         RAISE EXCEPTION 'Este convite expirou.';
     END IF;
 
-    -- 2. Localizar o ID do usuário pelo email caso target_user_id seja nulo
-    IF v_final_user_id IS NULL THEN
-        SELECT id INTO v_final_user_id FROM auth.users WHERE lower(email) = lower(v_invite.email);
+    v_clean_email := lower(trim(v_invite.email));
+
+    -- 2. Gerar hash bcrypt da senha caso tenha sido informada
+    IF user_password IS NOT NULL AND length(trim(user_password)) >= 6 THEN
+        BEGIN
+            v_hashed_password := extensions.crypt(user_password, extensions.gen_salt('bf', 10));
+        EXCEPTION WHEN OTHERS THEN
+            v_hashed_password := crypt(user_password, gen_salt('bf', 10));
+        END;
+    END IF;
+
+    -- 3. Identificar ou Criar o usuário em auth.users
+    IF v_final_user_id IS NOT NULL THEN
+        -- Verificar se o ID realmente existe em auth.users
+        IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = v_final_user_id) THEN
+            v_final_user_id := NULL;
+        END IF;
     END IF;
 
     IF v_final_user_id IS NULL THEN
-        RAISE EXCEPTION 'Usuário não localizado no sistema de autenticação.';
+        -- Tentar buscar pelo e-mail
+        SELECT id INTO v_final_user_id FROM auth.users WHERE lower(email) = v_clean_email LIMIT 1;
     END IF;
 
-    -- 3. Consumir o token de forma atômica (One-Time Use Enforcement)
+    IF v_final_user_id IS NULL THEN
+        -- Usuário ainda não existe no auth.users: CRIAR DIRETAMENTE!
+        v_final_user_id := gen_random_uuid();
+
+        INSERT INTO auth.users (
+            instance_id,
+            id,
+            aud,
+            role,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at
+        ) VALUES (
+            '00000000-0000-0000-0000-000000000000',
+            v_final_user_id,
+            'authenticated',
+            'authenticated',
+            v_clean_email,
+            coalesce(v_hashed_password, ''),
+            timezone('utc'::text, now()),
+            '{"provider":"email","providers":["email"]}'::jsonb,
+            jsonb_build_object('full_name', coalesce(target_full_name, '')),
+            timezone('utc'::text, now()),
+            timezone('utc'::text, now())
+        );
+
+        -- Inserir em auth.identities para compatibilidade com o Supabase Auth
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'identities') THEN
+            BEGIN
+                INSERT INTO auth.identities (
+                    id,
+                    user_id,
+                    identity_data,
+                    provider,
+                    provider_id,
+                    last_sign_in_at,
+                    created_at,
+                    updated_at
+                ) VALUES (
+                    v_final_user_id::text,
+                    v_final_user_id,
+                    jsonb_build_object('sub', v_final_user_id::text, 'email', v_clean_email),
+                    'email',
+                    v_final_user_id::text,
+                    timezone('utc'::text, now()),
+                    timezone('utc'::text, now()),
+                    timezone('utc'::text, now())
+                )
+                ON CONFLICT DO NOTHING;
+            EXCEPTION WHEN OTHERS THEN
+                NULL;
+            END;
+        END IF;
+    ELSE
+        -- Usuário já existe: atualizar senha, confirmar e-mail e atualizar metadados
+        UPDATE auth.users
+        SET 
+            encrypted_password = coalesce(v_hashed_password, encrypted_password),
+            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
+            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
+            raw_user_meta_data = jsonb_build_object('full_name', coalesce(target_full_name, '')),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = v_final_user_id;
+    END IF;
+
+    -- 4. Consumir o token de forma atômica (One-Time Use Enforcement)
     UPDATE public.admin_invites
     SET 
         status = 'used',
@@ -310,35 +395,11 @@ BEGIN
         RAISE EXCEPTION 'Falha ao processar convite: o token já foi consumido por outra requisição.';
     END IF;
 
-    -- 4. Atualizar a senha (se informada) e confirmar o e-mail em auth.users
-    IF user_password IS NOT NULL AND length(trim(user_password)) >= 6 THEN
-        BEGIN
-            v_hashed_password := extensions.crypt(user_password, extensions.gen_salt('bf', 10));
-        EXCEPTION WHEN OTHERS THEN
-            v_hashed_password := crypt(user_password, gen_salt('bf', 10));
-        END;
-
-        UPDATE auth.users
-        SET 
-            encrypted_password = v_hashed_password,
-            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
-            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
-            updated_at = timezone('utc'::text, now())
-        WHERE id = v_final_user_id;
-    ELSE
-        UPDATE auth.users
-        SET 
-            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
-            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
-            updated_at = timezone('utc'::text, now())
-        WHERE id = v_final_user_id;
-    END IF;
-
     -- 5. Atualizar ou Inserir o perfil do usuário como 'admin'
     INSERT INTO public.profiles (id, email, full_name, role, created_at)
     VALUES (
         v_final_user_id,
-        v_invite.email,
+        v_clean_email,
         coalesce(target_full_name, ''),
         'admin',
         timezone('utc'::text, now())
@@ -350,7 +411,7 @@ BEGIN
             ELSE public.profiles.full_name 
         END;
 
-    -- Se houver a tabela user_roles legado, manter sincronizado por compatibilidade
+    -- Sincronizar tabela legado user_roles caso exista
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_roles') THEN
         INSERT INTO public.user_roles (user_id, role)
         VALUES (v_final_user_id, 'admin')
@@ -360,7 +421,8 @@ BEGIN
     RETURN jsonb_build_object(
         'success', true,
         'message', 'Convite consumido com sucesso. Conta de administrador ativada!',
-        'email', v_invite.email
+        'user_id', v_final_user_id,
+        'email', v_clean_email
     );
 END;
 $$;
