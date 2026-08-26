@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, UploadCloud, FileText, X, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { Toast } from "../components/Toast";
+import { useSiteSettings, CareersSettings, defaultCareersSettings } from "../hooks/useSiteSettings";
 
 export function Careers() {
   const [name, setName] = useState("");
@@ -14,7 +15,20 @@ export function Careers() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
+  const { fetchCareersSettings } = useSiteSettings();
+  const [settings, setSettings] = useState<CareersSettings>(defaultCareersSettings);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const data = await fetchCareersSettings();
+      if (data) {
+        setSettings(data);
+      }
+    };
+    loadSettings();
+  }, [fetchCareersSettings]);
 
   const formatPhone = (val: string) => {
     const raw = val.replace(/\D/g, '');
@@ -67,7 +81,7 @@ export function Careers() {
       const fileName = `${Date.now()}_${name.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
       const filePath = `curriculos/${fileName}`;
 
-      const { error: uploadError, data: uploadData } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("resumes")
         .upload(filePath, file);
 
@@ -106,19 +120,20 @@ export function Careers() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl text-center">
         <div 
-          className="bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center"
+          className="bg-white p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 flex flex-col items-center"
         >
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
             <CheckCircle className="w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 font-montserrat">Candidatura Enviada!</h1>
-          <p className="text-gray-600 text-lg mb-8">
-            Obrigado pelo interesse em trabalhar na Situacional, {name.split(' ')[0]}! 
-            Recebemos seu currículo com sucesso e nossa equipe entrará em contato se houver alguma oportunidade adequada ao seu perfil.
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 font-montserrat">
+            {settings.successTitle || "Candidatura Enviada!"}
+          </h1>
+          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+            {settings.successMessage || defaultCareersSettings.successMessage}
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white border border-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white border border-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-md"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar para o início
@@ -137,11 +152,13 @@ export function Careers() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-gradient-to-r from-blue-700 to-blue-900 p-8 md:p-12 text-white">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat tracking-tight">Trabalhe Conosco</h1>
-          <p className="text-blue-100 text-lg max-w-xl">
-            Envie seu currículo e venha crescer com a Situacional.
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat tracking-tight">
+            {settings.headerTitle || "Trabalhe Conosco"}
+          </h1>
+          <p className="text-blue-100 text-lg max-w-xl leading-relaxed">
+            {settings.headerSubtitle || defaultCareersSettings.headerSubtitle}
           </p>
         </div>
 
@@ -217,73 +234,65 @@ export function Careers() {
 
             <div className="space-y-2 pt-2">
               <label className="block text-sm font-semibold text-gray-700">
-                Anexar Currículo (PDF) <span className="text-red-500 ml-0.5">*</span>
+                {settings.instructionsTitle || "Anexar Currículo (PDF)"} <span className="text-red-500 ml-0.5">*</span>
               </label>
+              <p className="text-xs text-gray-500 mb-2">
+                {settings.instructionsText || defaultCareersSettings.instructionsText}
+              </p>
               
               {!file ? (
                 <div 
-                  className="mt-2 flex justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 py-10 hover:border-blue-500 hover:bg-blue-50/50 transition-colors cursor-pointer group"
                   onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50/50 rounded-2xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 group"
                 >
-                  <div className="text-center">
-                    <UploadCloud className="mx-auto h-12 w-12 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    <div className="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
-                      <span className="relative cursor-pointer rounded-md bg-transparent font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500">
-                        Clique para selecionar um arquivo
-                      </span>
-                    </div>
-                    <p className="text-xs leading-5 text-gray-500 mt-2">Apenas PDF. Máximo de 5MB.</p>
+                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <UploadCloud className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-blue-600 group-hover:underline">Clique para selecionar</span> ou arraste o arquivo aqui
+                    <p className="text-xs text-gray-500 mt-1">Apenas formato PDF (máx. 5MB)</p>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm">
-                      <FileText className="w-6 h-6" />
+                <div className="bg-blue-50/60 border border-blue-200 rounded-2xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                      <FileText className="w-5 h-5" />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px] md:max-w-xs">{file.name}</p>
+                    <div className="truncate">
+                      <p className="text-sm font-semibold text-gray-800 truncate">{file.name}</p>
                       <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={removeFile}
-                    className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               )}
-              
               <input
-                type="file"
                 ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="application/pdf"
+                type="file"
+                accept=".pdf,application/pdf"
                 className="hidden"
+                onChange={handleFileChange}
               />
             </div>
 
-            <div className="pt-6">
-              <button
-                type="submit"
-                disabled={isSubmitting || !file || !name || !email || !phone || !department}
-                className="w-full flex justify-center py-3.5 px-4 rounded-xl shadow-sm text-base font-semibold bg-blue-600 text-white border border-blue-600 hover:bg-white hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Enviando currículo...
-                  </span>
-                ) : (
-                  "Enviar Candidatura"
-                )}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer font-montserrat"
+            >
+              {isSubmitting ? (
+                <>Enviando Currículo...</>
+              ) : (
+                <>Enviar Candidatura</>
+              )}
+            </button>
           </form>
         </div>
       </div>

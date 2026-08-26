@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, UploadCloud, FileText, X, CheckCircle, AlertCircle, Briefcase, Info, Image as ImageIcon } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { Toast } from "../components/Toast";
+import { useSiteSettings, SuppliersSettings, defaultSuppliersSettings } from "../hooks/useSiteSettings";
 
 export function Suppliers() {
   const [companyName, setCompanyName] = useState("");
@@ -18,7 +19,20 @@ export function Suppliers() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const { fetchSuppliersSettings } = useSiteSettings();
+  const [settings, setSettings] = useState<SuppliersSettings>(defaultSuppliersSettings);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const data = await fetchSuppliersSettings();
+      if (data) {
+        setSettings(data);
+      }
+    };
+    loadSettings();
+  }, [fetchSuppliersSettings]);
 
   const formatPhone = (val: string) => {
     const raw = val.replace(/\D/g, '');
@@ -127,15 +141,16 @@ export function Suppliers() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl text-center">
         <div
-          className="bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center"
+          className="bg-white p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 flex flex-col items-center"
         >
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
             <CheckCircle className="w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 font-montserrat">Cadastro Recebido!</h1>
-          <p className="text-gray-600 text-lg mb-8">
-            Obrigado pelo interesse! Recebemos os dados da sua empresa <strong>{companyName}</strong> com sucesso.
-            Nossa equipe avaliará o seu perfil e entraremos em contato.
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 font-montserrat">
+            {settings.successTitle || "Cadastro Realizado com Sucesso!"}
+          </h1>
+          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+            {settings.successMessage || defaultSuppliersSettings.successMessage}
           </p>
           <Link
             to="/"
@@ -158,16 +173,18 @@ export function Suppliers() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-gradient-to-r from-[#235487] to-blue-900 p-8 md:p-12 text-white flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat tracking-tight">Fornecedores e Prestadores</h1>
-            <p className="text-blue-100 text-lg max-w-xl">
-              Cadastre sua empresa para fazer parte da nossa rede de parceiros e prestar serviços para nossos condomínios.
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat tracking-tight">
+              {settings.headerTitle || "Fornecedores e Prestadores"}
+            </h1>
+            <p className="text-blue-100 text-lg max-w-xl leading-relaxed">
+              {settings.headerSubtitle || defaultSuppliersSettings.headerSubtitle}
             </p>
           </div>
-          <div className="hidden md:flex p-4 bg-white/10 rounded-full backdrop-blur-sm">
-            <Briefcase className="w-16 h-16 text-blue-50" />
+          <div className="hidden md:flex p-4 bg-white/10 rounded-2xl backdrop-blur-sm shadow-inner">
+            <Briefcase className="w-14 h-14 text-blue-50" />
           </div>
         </div>
 
@@ -177,7 +194,7 @@ export function Suppliers() {
           <form onSubmit={handleSubmit} className="space-y-8">
             
             <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 border-b pb-2">1. Dados Básicos da Empresa</h3>
+              <h3 className="text-lg font-bold text-gray-900 border-b pb-2 font-montserrat">1. Dados Básicos da Empresa</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700">Nome da Empresa <span className="text-red-500 ml-0.5">*</span></label>
@@ -228,7 +245,7 @@ export function Suppliers() {
 
             
             <div className="space-y-6 pt-4">
-              <h3 className="text-lg font-bold text-gray-900 border-b pb-2">2. Sobre o Serviço</h3>
+              <h3 className="text-lg font-bold text-gray-900 border-b pb-2 font-montserrat">2. Sobre o Serviço</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700">Qual trabalho oferece? <span className="text-red-500 ml-0.5">*</span></label>
@@ -268,9 +285,9 @@ export function Suppliers() {
 
             
             <div className="space-y-6 pt-4">
-              <h3 className="text-lg font-bold text-gray-900 border-b pb-2">3. Anexos e Permissões</h3>
+              <h3 className="text-lg font-bold text-gray-900 border-b pb-2 font-montserrat">3. Anexos e Permissões</h3>
 
-              <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                 <div className="flex items-center h-6">
                   <input
                     id="competeBudgets"
@@ -282,12 +299,12 @@ export function Suppliers() {
                 </div>
                 <div className="flex items-center flex-wrap gap-2">
                   <label htmlFor="competeBudgets" className="text-sm font-semibold text-gray-900 cursor-pointer select-none">
-                    Quero participar da cotação orçamentária <span className="text-red-500 ml-0.5">*</span>
+                    {settings.termsCheckboxText || defaultSuppliersSettings.termsCheckboxText} <span className="text-red-500 ml-0.5">*</span>
                   </label>
                   <div className="relative group flex items-center justify-center">
                     <Info className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
-                      Ao concordar/ marcar a caixa você aceita que condominios mandem pedidos de orçamentos que vão ser avaliados juntos de outros prestadores de serviços para se obter a melhor opção.
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-xl p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg leading-relaxed">
+                      {settings.infoBoxText || defaultSuppliersSettings.infoBoxText}
                       <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
                     </div>
                   </div>
@@ -299,7 +316,7 @@ export function Suppliers() {
                   <label className="block text-sm font-semibold text-gray-700">Pequena logo da empresa (Opcional)</label>
                   <div className="relative group flex items-center justify-center">
                     <Info className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-xl p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
                       O envio da logo facilita o processo de destaque como parceiro na página principal do site
                       <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
                     </div>
@@ -308,7 +325,7 @@ export function Suppliers() {
 
                 {!file ? (
                   <div
-                    className="flex justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 py-8 hover:border-blue-500 hover:bg-blue-50/50 transition-colors cursor-pointer group"
+                    className="flex justify-center rounded-2xl border-2 border-dashed border-gray-300 px-6 py-8 hover:border-blue-500 hover:bg-blue-50/50 transition-colors cursor-pointer group"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <div className="text-center">
@@ -322,9 +339,9 @@ export function Suppliers() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-100 rounded-xl max-w-md">
+                  <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-100 rounded-2xl max-w-md">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm flex-shrink-0">
+                      <div className="p-2 bg-white rounded-xl text-blue-600 shadow-sm flex-shrink-0">
                         <ImageIcon className="w-6 h-6" />
                       </div>
                       <div className="overflow-hidden">
@@ -358,15 +375,11 @@ export function Suppliers() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center py-4 px-4 rounded-xl shadow-sm text-lg font-semibold bg-blue-600 text-white border border-blue-600 hover:bg-white hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full flex justify-center py-4 px-4 rounded-xl shadow-lg shadow-blue-600/20 text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-montserrat cursor-pointer"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Enviando dados...
+                    Enviando cadastro...
                   </span>
                 ) : (
                   "Finalizar Cadastro"

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Star, Send, Loader2, User } from "lucide-react";
+import { Star, Send, Loader2 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
+import { useSiteSettings, FeedbackSettings, defaultFeedbackSettings } from "../hooks/useSiteSettings";
 
 export function Feedback() {
   const [formData, setFormData] = useState({
@@ -15,10 +16,21 @@ export function Feedback() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { fetchFeedbackSettings } = useSiteSettings();
+  const [settings, setSettings] = useState<FeedbackSettings>(defaultFeedbackSettings);
+
   useEffect(() => {
     fetchTestimonials();
     fetchCondominiums();
-  }, []);
+    
+    const loadSettings = async () => {
+      const data = await fetchFeedbackSettings();
+      if (data) {
+        setSettings(data);
+      }
+    };
+    loadSettings();
+  }, [fetchFeedbackSettings]);
 
   const fetchCondominiums = async () => {
     try {
@@ -96,14 +108,14 @@ export function Feedback() {
 
   return (
     <div className="py-16">
-      
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-12">
+      {/* Topo / Hero */}
+      <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">
-            Feedbacks de Clientes
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 font-montserrat">
+            {settings.headerTitle || "Feedbacks de Clientes"}
           </h1>
-          <p className="text-xl text-blue-100">
-            O que nossos clientes dizem sobre nossos serviços
+          <p className="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+            {settings.headerSubtitle || defaultFeedbackSettings.headerSubtitle}
           </p>
         </div>
       </div>
@@ -111,9 +123,10 @@ export function Feedback() {
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           
+          {/* Lista de Depoimentos */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">
-              Depoimentos de Nossos Clientes
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 font-montserrat">
+              {settings.testimonialsTitle || "Depoimentos de Nossos Clientes"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {loading ? (
@@ -127,7 +140,7 @@ export function Feedback() {
               ) : activeTestimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
-                  className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow flex flex-col"
+                  className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow flex flex-col border border-gray-100"
                 >
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(5)].map((_, i) => (
@@ -137,12 +150,12 @@ export function Feedback() {
                       />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-6 italic flex-1">
+                  <p className="text-gray-700 mb-6 italic flex-1 text-sm leading-relaxed">
                     "{testimonial.content}"
                   </p>
                   <div className="border-t pt-4 flex items-center gap-4 mt-auto">
                     {testimonial.avatar_url ? (
-                      <img src={testimonial.avatar_url} className="w-12 h-12 rounded-full object-cover" />
+                      <img src={testimonial.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl">
                         {testimonial.name.charAt(0)}
@@ -152,10 +165,7 @@ export function Feedback() {
                       <p className="font-semibold text-gray-900 leading-tight">
                         {testimonial.name}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        {testimonial.role || "Cliente"}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 mt-0.5">
                         {new Date(testimonial.created_at).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
@@ -165,24 +175,27 @@ export function Feedback() {
             </div>
           </div>
 
-          
+          {/* Formulário Lateral */}
           <div>
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-20">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Deixe seu Feedback
+            <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 md:p-8 sticky top-20">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 font-montserrat">
+                {settings.formTitle || "Deixe seu Feedback"}
               </h2>
+              <p className="text-xs text-gray-500 mb-6">
+                {settings.formDescription || defaultFeedbackSettings.formDescription}
+              </p>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
-                  <p className="text-sm">{error}</p>
+                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-4 text-xs font-medium">
+                  <p>{error}</p>
                 </div>
               )}
 
               {submitted ? (
-                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
-                  <p className="font-semibold">Obrigado pelo feedback!</p>
-                  <p className="text-sm mt-1">
-                    Sua opinião foi enviada com sucesso.
+                <div className="bg-green-50 border border-green-200 text-green-800 p-6 rounded-2xl text-center">
+                  <p className="font-bold text-base mb-1">Obrigado pelo feedback!</p>
+                  <p className="text-xs">
+                    Sua opinião foi enviada com sucesso e será analisada por nossa equipe.
                   </p>
                 </div>
               ) : (
@@ -190,7 +203,7 @@ export function Feedback() {
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-xs font-semibold text-gray-700 uppercase mb-1.5"
                     >
                       Nome Completo *
                     </label>
@@ -201,14 +214,15 @@ export function Feedback() {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Seu nome completo"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   <div>
                     <label
                       htmlFor="condominium"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-xs font-semibold text-gray-700 uppercase mb-1.5"
                     >
                       Condomínio *
                     </label>
@@ -218,7 +232,7 @@ export function Feedback() {
                       required
                       value={formData.condominium_id}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                     >
                       <option value="" disabled>Selecione o condomínio</option>
                       {condominiums.map(c => (
@@ -228,7 +242,7 @@ export function Feedback() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs font-semibold text-gray-700 uppercase mb-1.5">
                       Avaliação *
                     </label>
                     <div className="flex gap-2">
@@ -239,10 +253,10 @@ export function Feedback() {
                           onClick={() =>
                             setFormData({ ...formData, rating: star })
                           }
-                          className="focus:outline-none"
+                          className="focus:outline-none cursor-pointer"
                         >
                           <Star
-                            className={`h-8 w-8 ${
+                            className={`h-7 w-7 ${
                               star <= formData.rating
                                 ? "text-yellow-400 fill-yellow-400"
                                 : "text-gray-300"
@@ -256,7 +270,7 @@ export function Feedback() {
                   <div>
                     <label
                       htmlFor="text"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-xs font-semibold text-gray-700 uppercase mb-1.5"
                     >
                       Seu Comentário *
                     </label>
@@ -264,44 +278,23 @@ export function Feedback() {
                       id="text"
                       name="text"
                       required
-                      rows={5}
+                      rows={4}
                       value={formData.text}
                       onChange={handleChange}
                       placeholder="Conte-nos sobre sua experiência..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white border border-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 cursor-pointer font-montserrat text-sm"
                   >
-                    <Send className="h-5 w-5" />
+                    <Send className="h-4 w-4" />
                     Enviar Feedback
                   </button>
                 </form>
               )}
-            </div>
-          </div>
-        </div>
-
-        
-        <div className="mt-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
-          <h2 className="text-2xl font-bold mb-8 text-center">
-            Nossa Avaliação
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold mb-2">4.9/5.0</div>
-              <div className="text-blue-100">Avaliação Média</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">98%</div>
-              <div className="text-blue-100">Clientes Satisfeitos</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">350+</div>
-              <div className="text-blue-100">Avaliações Positivas</div>
             </div>
           </div>
         </div>

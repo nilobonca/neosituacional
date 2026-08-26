@@ -5,7 +5,7 @@ import { useBlogPosts } from "../hooks/useBlogPosts";
 import { Link } from "react-router";
 import { supabase } from "../../lib/supabase";
 
-import { useSiteSettings, HomeBanners } from "../hooks/useSiteSettings";
+import { useSiteSettings, HomeBanners, defaultHomeSettings } from "../hooks/useSiteSettings";
 import { HelpSelectionForm } from "../components/HelpSelectionForm";
 
 export function Home() {
@@ -13,12 +13,7 @@ export function Home() {
   const [activeClients, setActiveClients] = useState<any[]>([]);
   const [activeTestimonials, setActiveTestimonials] = useState<any[]>([]);
   const { fetchHomeBanners } = useSiteSettings();
-  const [banners, setBanners] = useState<HomeBanners>({
-    heroTitle: "Administração Condominial Profissional e Transparente",
-    heroSubtitle: "Soluções completas em gestão condominial com tecnologia, eficiência e foco total na satisfação dos moradores.",
-    ctaTitle: "Pronto para uma gestão condominial de excelência?",
-    ctaSubtitle: "Entre em contato conosco e descubra como podemos transformar a administração do seu condomínio."
-  });
+  const [banners, setBanners] = useState<HomeBanners>(defaultHomeSettings);
 
   useEffect(() => {
     fetchPosts();
@@ -52,7 +47,7 @@ export function Home() {
 
   return (
     <div>
-      
+      {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -69,13 +64,12 @@ export function Home() {
                   to="/servicos"
                   className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition-colors inline-flex items-center gap-2 shadow-md"
                 >
-                  Conheça nossos serviços
+                  {banners.heroButtonText || "Conheça nossos serviços"}
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </div>
             </div>
 
-            
             <div className="lg:col-span-5 w-full">
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl text-gray-900 border border-white/20">
                 <HelpSelectionForm compact={true} />
@@ -85,16 +79,15 @@ export function Home() {
         </div>
       </section>
 
-      
+      {/* Blog Section */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Blog - Conteúdo Técnico
+              {banners.blogSectionTitle || "Blog - Conteúdo Técnico"}
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Artigos e informações técnicas sobre administração condominial,
-              legislação, gestão e boas práticas.
+              {banners.blogSectionSubtitle || "Artigos e informações técnicas sobre administração condominial, legislação, gestão e boas práticas."}
             </p>
           </div>
           {loadingPosts ? (
@@ -107,22 +100,22 @@ export function Home() {
               to="/blog"
               className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors"
             >
-              Ver todos os artigos
+              {banners.blogButtonText || "Ver todos os artigos"}
               <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
       </section>
 
-      
+      {/* Clientes e Parceiros */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Nossos Clientes e Parceiros
+              {banners.clientsSectionTitle || "Nossos Clientes e Parceiros"}
             </h2>
             <p className="text-gray-600">
-              Condomínios que confiam em nossa gestão
+              {banners.clientsSectionSubtitle || "Condomínios que confiam em nossa gestão"}
             </p>
           </div>
           <div className="w-full relative overflow-hidden">
@@ -130,7 +123,8 @@ export function Home() {
               <div className="text-center text-gray-400 italic py-8">
                 Nenhum parceiro adicionado ainda...
               </div>
-            ) : (              <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center py-8">
+            ) : (
+              <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center py-8">
                 {activeClients.map((client) => {
                   const CardComponent = client.website_url ? 'a' : 'div';
                   const linkProps = client.website_url ? { href: client.website_url, target: "_blank", rel: "noopener noreferrer" } : {};
@@ -156,7 +150,7 @@ export function Home() {
         </div>
       </section>
 
-      
+      {/* Depoimentos em Destaque */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -216,7 +210,7 @@ export function Home() {
         </div>
       </section>
 
-      
+      {/* Banner Final CTA */}
       <section className="py-16 bg-blue-600 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
@@ -227,9 +221,9 @@ export function Home() {
           </p>
           <Link
             to="/proposta"
-            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition-colors inline-flex items-center gap-2"
+            className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-500 hover:text-white transition-colors inline-flex items-center gap-2 shadow-lg"
           >
-            Solicitar Orçamento
+            {banners.ctaButtonText || "Solicitar Orçamento"}
             <ArrowRight className="h-5 w-5" />
           </Link>
         </div>

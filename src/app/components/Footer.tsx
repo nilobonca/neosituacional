@@ -44,9 +44,8 @@ export function Footer() {
                 SITUACIONAL
               </span>
             </div>
-            <p className="text-sm text-gray-400">
-              Soluções completas em administração condominial com transparência,
-              eficiência e tecnologia.
+            <p className="text-sm text-gray-400 leading-relaxed">
+              {settings.description || "Soluções completas em administração condominial com transparência, eficiência e tecnologia."}
             </p>
             <div className="flex gap-4 mt-6">
               {settings.facebook && (

@@ -1,109 +1,149 @@
-import { Target, Eye, Award, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Target, Eye, Award, Users, Building2, Home, Sparkles, Clock } from "lucide-react";
+import { useSiteSettings, AboutSettings, defaultAboutSettings } from "../hooks/useSiteSettings";
 
 export function About() {
+  const { fetchAboutSettings } = useSiteSettings();
+  const [settings, setSettings] = useState<AboutSettings>(defaultAboutSettings);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const data = await fetchAboutSettings();
+      if (data) {
+        setSettings(data);
+      }
+    };
+    loadSettings();
+  }, [fetchAboutSettings]);
+
+  const stats = [
+    {
+      icon: Building2,
+      value: settings.statsCondos || defaultAboutSettings.statsCondos,
+      label: settings.statsCondosLabel || defaultAboutSettings.statsCondosLabel,
+      color: "from-blue-600 to-indigo-600"
+    },
+    {
+      icon: Home,
+      value: settings.statsUnits || defaultAboutSettings.statsUnits,
+      label: settings.statsUnitsLabel || defaultAboutSettings.statsUnitsLabel,
+      color: "from-indigo-600 to-blue-700"
+    },
+    {
+      icon: Users,
+      value: settings.statsEmployees || defaultAboutSettings.statsEmployees,
+      label: settings.statsEmployeesLabel || defaultAboutSettings.statsEmployeesLabel,
+      color: "from-blue-700 to-cyan-700"
+    },
+    {
+      icon: Clock,
+      value: settings.statsExperience || defaultAboutSettings.statsExperience,
+      label: settings.statsExperienceLabel || defaultAboutSettings.statsExperienceLabel,
+      color: "from-cyan-700 to-blue-600"
+    }
+  ];
+
   const values = [
     {
       icon: Target,
-      title: "Missão",
-      description: "Oferecer serviços de administração condominial com excelência, transparência e inovação, garantindo a satisfação e tranquilidade dos moradores."
+      title: settings.missionTitle || "Missão",
+      description: settings.missionText || defaultAboutSettings.missionText
     },
     {
       icon: Eye,
-      title: "Visão",
-      description: "Ser referência nacional em administração condominial, reconhecida pela qualidade dos serviços e pela transformação digital na gestão de condomínios."
+      title: settings.visionTitle || "Visão",
+      description: settings.visionText || defaultAboutSettings.visionText
     },
     {
       icon: Award,
-      title: "Valores",
-      description: "Transparência, ética, profissionalismo, inovação tecnológica, compromisso com resultados e foco no cliente."
+      title: settings.valuesTitle || "Valores",
+      description: settings.valuesText || defaultAboutSettings.valuesText
     }
   ];
 
-  const team = [
-    {
-      name: "Roberto Silva",
-      role: "CEO & Fundador",
-      description: "Mais de 20 anos de experiência em administração condominial"
-    },
-    {
-      name: "Ana Paula Costa",
-      role: "Diretora Financeira",
-      description: "Especialista em gestão financeira e contabilidade condominial"
-    },
-    {
-      name: "Carlos Henrique",
-      role: "Diretor Jurídico",
-      description: "Advogado especializado em direito imobiliário e condominial"
-    },
-    {
-      name: "Mariana Santos",
-      role: "Diretora de Tecnologia",
-      description: "Responsável pela inovação e transformação digital"
-    }
-  ];
+  const team = settings.teamMembers && settings.teamMembers.length > 0
+    ? settings.teamMembers
+    : defaultAboutSettings.teamMembers;
+
+  const historyParagraphs = (settings.historyText || defaultAboutSettings.historyText)
+    .split("\n\n")
+    .filter(p => p.trim().length > 0);
 
   return (
     <div className="py-16">
-      
-      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
+      {/* Topo / Hero */}
+      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20 relative">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Quem Somos
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 font-montserrat">
+              {settings.headerTitle || "Quem Somos"}
             </h1>
-            <p className="text-xl text-blue-100">
-              Uma empresa dedicada à excelência em administração condominial,
-              com foco em transparência, tecnologia e satisfação dos clientes.
+            <p className="text-xl text-blue-100 leading-relaxed">
+              {settings.headerSubtitle || defaultAboutSettings.headerSubtitle}
             </p>
           </div>
         </div>
       </section>
 
-      
-      <section className="py-16">
+      {/* Estatísticas e Números em Destaque */}
+      <section className="container mx-auto px-4 -mt-10 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 flex items-center gap-5 hover:-translate-y-1 transition-transform duration-300"
+              >
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.color} text-white flex items-center justify-center shadow-md flex-shrink-0`}>
+                  <Icon className="w-7 h-7" />
+                </div>
+                <div>
+                  <div className="text-2xl md:text-3xl font-extrabold text-gray-900 font-montserrat tracking-tight leading-none mb-1">
+                    {stat.value}
+                  </div>
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    {stat.label}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* História */}
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-              Nossa História
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center font-montserrat">
+              {settings.historyTitle || "Nossa História"}
             </h2>
-            <div className="prose max-w-none text-gray-700 space-y-4">
-              <p>
-                Fundada em 2010, a SITUACIONAL nasceu com o propósito de revolucionar
-                a administração condominial no Brasil. Começamos atendendo apenas 5 condomínios
-                e hoje somos responsáveis pela gestão de mais de 150 empreendimentos em todo o país.
-              </p>
-              <p>
-                Nossa trajetória é marcada pela busca constante por inovação e excelência.
-                Investimos continuamente em tecnologia para oferecer aos nossos clientes
-                ferramentas modernas de gestão, garantindo transparência total e facilidade
-                de comunicação entre síndicos, administradores e moradores.
-              </p>
-              <p>
-                Com uma equipe altamente qualificada e comprometida, nossa missão é proporcionar
-                tranquilidade aos síndicos e moradores, cuidando de todos os aspectos
-                administrativos, financeiros, jurídicos e operacionais dos condomínios.
-              </p>
+            <div className="prose max-w-none text-gray-700 space-y-4 text-base md:text-lg leading-relaxed">
+              {historyParagraphs.map((paragraph, idx) => (
+                <p key={idx}>{paragraph}</p>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      
+      {/* Missão, Visão e Valores */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {values.map((value, index) => (
               <div
                 key={index}
-                className="bg-white p-8 rounded-lg shadow-md text-center"
+                className="bg-white p-8 rounded-3xl shadow-md text-center border border-gray-100 hover:shadow-lg transition-shadow"
               >
-                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <value.icon className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4 font-montserrat">
                   {value.title}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 leading-relaxed text-sm">
                   {value.description}
                 </p>
               </div>
@@ -112,56 +152,32 @@ export function About() {
         </div>
       </section>
 
-      
-      <section className="py-16">
+      {/* Equipe */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">
-            Nossa Equipe
+          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center font-montserrat">
+            {settings.teamTitle || "Nossa Equipe"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, index) => (
               <div
                 key={index}
-                className="text-center"
+                className="text-center p-6 rounded-3xl bg-gray-50/50 border border-gray-100 hover:bg-white hover:shadow-md transition-all"
               >
-                <div className="bg-gradient-to-br from-blue-100 to-blue-200 w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-16 w-16 text-blue-600" />
+                <div className="bg-gradient-to-br from-blue-100 to-blue-200 w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                  <Users className="h-14 w-14 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                <h3 className="font-bold text-base text-gray-900 mb-1 font-montserrat">
                   {member.name}
                 </h3>
-                <p className="text-blue-600 font-medium mb-2">
+                <p className="text-blue-600 font-semibold text-xs mb-2">
                   {member.role}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs text-gray-600 leading-relaxed">
                   {member.description}
                 </p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      
-      <section className="py-16 bg-blue-600 text-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold mb-2">150+</div>
-              <div className="text-blue-100">Condomínios</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">15.000+</div>
-              <div className="text-blue-100">Unidades Gerenciadas</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">50+</div>
-              <div className="text-blue-100">Colaboradores</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">16</div>
-              <div className="text-blue-100">Anos de Experiência</div>
-            </div>
           </div>
         </div>
       </section>

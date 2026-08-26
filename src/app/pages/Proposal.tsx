@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router";
 import { ArrowLeft, UploadCloud, FileText, X, CheckCircle, AlertCircle, Calculator } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { Toast } from "../components/Toast";
+import { useSiteSettings, ProposalSettings, defaultProposalSettings } from "../hooks/useSiteSettings";
 
 export function Proposal() {
   const [document, setDocument] = useState("");
@@ -18,8 +19,22 @@ export function Proposal() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
+
+  const { fetchProposalSettings } = useSiteSettings();
+  const [settings, setSettings] = useState<ProposalSettings>(defaultProposalSettings);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const data = await fetchProposalSettings();
+      if (data) {
+        setSettings(data);
+      }
+    };
+    loadSettings();
+  }, [fetchProposalSettings]);
+
   const formatDocument = (val: string) => {
     const raw = val.replace(/\D/g, '');
     if (raw.length <= 11) {
@@ -149,7 +164,7 @@ export function Proposal() {
             apartments: parseInt(apartments || "0", 10),
             houses: parseInt(houses || "0", 10),
             employees: parseInt(employees || "0", 10),
-            files_urls: fileUrls, // Armazenando array JSON
+            files_urls: fileUrls,
             status: "new"
           }
         ]);
@@ -170,20 +185,20 @@ export function Proposal() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl text-center">
         <div 
-          className="bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center"
+          className="bg-white p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100 flex flex-col items-center"
         >
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
             <CheckCircle className="w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 font-montserrat">Solicitação Recebida!</h1>
-          <p className="text-gray-600 text-lg mb-8">
-            Obrigado pelo interesse, {representativeName.split(' ')[0]}! 
-            Recebemos os dados do condomínio <strong>{condoName}</strong> com sucesso.
-            Nossa equipe fará a análise dos arquivos e entrará em contato em breve para apresentar a melhor proposta.
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 font-montserrat">
+            {settings.successTitle || "Solicitação Recebida!"}
+          </h1>
+          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+            {settings.successMessage || defaultProposalSettings.successMessage}
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white border border-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white border border-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-md"
           >
             <ArrowLeft className="w-5 h-5" />
             Voltar para o início
@@ -202,16 +217,18 @@ export function Proposal() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-gradient-to-r from-[#235487] to-blue-900 p-8 md:p-12 text-white flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat tracking-tight">Proposta Comercial</h1>
-            <p className="text-blue-100 text-lg max-w-xl">
-              Preencha o formulário abaixo com os dados do seu condomínio para receber uma proposta personalizada da Situacional.
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat tracking-tight">
+              {settings.headerTitle || "Proposta Comercial"}
+            </h1>
+            <p className="text-blue-100 text-lg max-w-xl leading-relaxed">
+              {settings.headerSubtitle || defaultProposalSettings.headerSubtitle}
             </p>
           </div>
-          <div className="hidden md:flex p-4 bg-white/10 rounded-full backdrop-blur-sm">
-            <Calculator className="w-16 h-16 text-blue-50" />
+          <div className="hidden md:flex p-4 bg-white/10 rounded-2xl backdrop-blur-sm shadow-inner">
+            <Calculator className="w-14 h-14 text-blue-50" />
           </div>
         </div>
 
@@ -221,7 +238,7 @@ export function Proposal() {
           <form onSubmit={handleSubmit} className="space-y-8">
             
             <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 border-b pb-2">1. Dados Básicos</h3>
+              <h3 className="text-lg font-bold text-gray-900 border-b pb-2 font-montserrat">1. Dados Básicos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700">CNPJ ou CPF <span className="text-red-500 ml-0.5">*</span></label>
@@ -285,7 +302,7 @@ export function Proposal() {
 
             
             <div className="space-y-6 pt-4">
-              <h3 className="text-lg font-bold text-gray-900 border-b pb-2">2. Estrutura do Condomínio</h3>
+              <h3 className="text-lg font-bold text-gray-900 border-b pb-2 font-montserrat">2. Estrutura do Condomínio</h3>
               <p className="text-sm text-gray-500 mb-4">Atenção: É obrigatório informar a quantidade de casas OU apartamentos.</p>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -345,13 +362,13 @@ export function Proposal() {
 
             
             <div className="space-y-6 pt-4">
-              <h3 className="text-lg font-bold text-gray-900 border-b pb-2">3. Arquivos para Análise</h3>
+              <h3 className="text-lg font-bold text-gray-900 border-b pb-2 font-montserrat">3. Arquivos para Análise</h3>
               <p className="font-medium text-blue-700 mb-2">Faça upload de 1 a 3 balancetes para análise. <span className="text-red-500 ml-0.5">*</span></p>
               
               <div className="space-y-4">
                 {files.length < 3 && (
                   <div 
-                    className="flex justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 py-10 hover:border-blue-500 hover:bg-blue-50/50 transition-colors cursor-pointer group"
+                    className="flex justify-center rounded-2xl border-2 border-dashed border-gray-300 px-6 py-10 hover:border-blue-500 hover:bg-blue-50/50 transition-colors cursor-pointer group"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <div className="text-center">
@@ -381,9 +398,9 @@ export function Proposal() {
                     <h4 className="text-sm font-semibold text-gray-700">Arquivos anexados ({files.length}/3):</h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {files.map((file, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                        <div key={idx} className="flex items-center justify-between p-4 bg-blue-50 border border-blue-100 rounded-2xl">
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="p-2 bg-white rounded-lg text-blue-600 shadow-sm flex-shrink-0">
+                            <div className="p-2 bg-white rounded-xl text-blue-600 shadow-sm flex-shrink-0">
                               <FileText className="w-5 h-5" />
                             </div>
                             <div className="overflow-hidden">
@@ -412,14 +429,10 @@ export function Proposal() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center py-4 px-4 rounded-xl shadow-sm text-lg font-semibold bg-blue-600 text-white border border-blue-600 hover:bg-white hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="w-full flex justify-center py-4 px-4 rounded-xl shadow-lg shadow-blue-600/20 text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-montserrat cursor-pointer"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
                     Enviando proposta...
                   </span>
                 ) : (

@@ -74,7 +74,7 @@ export const router = createBrowserRouter([
       { path: "blog/new", Component: AdminBlogEdit },
       { path: "blog/edit/:id", Component: AdminBlogEdit },
       { path: "clients", Component: AdminClients },
-      { path: "services", Component: AdminServices },
+      { path: "services", Component: AdminSettings },
       { path: "testimonials", Component: AdminTestimonials },
       {
         path: "condominiums",
