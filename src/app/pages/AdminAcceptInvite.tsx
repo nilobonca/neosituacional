@@ -95,12 +95,46 @@ export function AdminAcceptInvite() {
     try {
       setSubmitting(true);
 
-      // 1. Chamar RPC atômica no banco: cria/atualiza em auth.users e auth.identities,
-      //    grava a senha com hash bcrypt, confirma o e-mail e atribui role 'admin'.
-      //    (Não usa o endpoint de signUp do cliente, evitando o limite de taxa 429)
-      const { data: acceptData, error: acceptError } = await supabase.rpc("accept_admin_invite", {
+      // 1. Cadastrar o usuário no Supabase Auth via GoTrue para garantir o schema perfeito
+      let userId: string | null = null;
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: inviteEmail,
+        password: password,
+        options: {
+          data: {
+            full_name: fullName.trim()
+          }
+        }
+      });
+
+      if (signUpError) {
+        // Se a conta já existe, tenta recuperar o ID via sessão
+        if (signUpError.message?.toLowerCase().includes("already registered") || signUpError.status === 400) {
+          const { data: signInData } = await supabase.auth.signInWithPassword({
+            email: inviteEmail,
+            password: password
+          });
+          userId = signInData?.user?.id || null;
+        } else {
+          throw signUpError;
+        }
+      } else {
+        userId = signUpData?.user?.id || null;
+      }
+
+      if (!userId) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        userId = sessionData?.session?.user?.id || null;
+      }
+
+      if (!userId) {
+        throw new Error("Não foi possível gerar a identificação do usuário. Tente novamente.");
+      }
+
+      // 2. Chamar RPC atômica que consome o convite, confirma o e-mail no Auth e eleva a role para 'admin'
+      const { error: acceptError } = await supabase.rpc("accept_admin_invite", {
         token_jwt: token,
-        target_user_id: null,
+        target_user_id: userId,
         target_full_name: fullName.trim(),
         user_password: password
       });
@@ -109,14 +143,14 @@ export function AdminAcceptInvite() {
         throw acceptError;
       }
 
-      // 2. Autenticar diretamente com a senha recém-criada
+      // 3. Fazer login com a conta ativada
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: inviteEmail,
         password: password
       });
 
       if (signInError) {
-        console.warn("Aviso na autenticação pós-ativação:", signInError);
+        console.warn("Aviso no auto-login pós-ativação:", signInError);
       }
 
       setSuccess(true);
@@ -126,7 +160,7 @@ export function AdminAcceptInvite() {
 
     } catch (err: any) {
       console.error("Erro ao aceitar convite:", err);
-      setFormError(err.message || "Erro ao processar o aceite do convite.");
+      setFormError(err.message || "Erro ao processar o cadastro do administrador.");
     } finally {
       setSubmitting(false);
     }

@@ -52,7 +52,7 @@ USING ( public.is_admin() );
 -- 5. Funções Auxiliares para Criptografia e Geração de JWT no PostgreSQL
 -- =========================================================================
 
--- Função para converter bytes em Base64 URL-Safe (padrão RFC 7515 / RFC 7519)
+DROP FUNCTION IF EXISTS public.base64url_encode(BYTEA);
 CREATE OR REPLACE FUNCTION public.base64url_encode(input_bytes BYTEA)
 RETURNS TEXT AS $$
 BEGIN
@@ -60,7 +60,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
--- Função interna para assinar payload e produzir um JWT com HMAC-SHA256
+DROP FUNCTION IF EXISTS public.generate_jwt_token(UUID, TEXT, TIMESTAMP WITH TIME ZONE);
 CREATE OR REPLACE FUNCTION public.generate_jwt_token(
     p_invite_id UUID,
     p_email TEXT,
@@ -72,7 +72,7 @@ SECURITY DEFINER
 SET search_path = public, extensions, auth
 AS $$
 DECLARE
-    v_secret TEXT := 'situacional_admin_invite_secret_key_2026_super_secure'; -- Segredo de assinatura
+    v_secret TEXT := 'situacional_admin_invite_secret_key_2026_super_secure';
     v_header JSONB;
     v_payload JSONB;
     v_header_b64 TEXT;
@@ -114,6 +114,8 @@ $$;
 -- =========================================================================
 -- 6. Função RPC: Criar Convite de Admin (create_admin_invite)
 -- =========================================================================
+DROP FUNCTION IF EXISTS public.create_admin_invite(TEXT, INTEGER);
+DROP FUNCTION IF EXISTS public.create_admin_invite;
 CREATE OR REPLACE FUNCTION public.create_admin_invite(
     target_email TEXT,
     hours_valid INTEGER DEFAULT 48
@@ -183,6 +185,8 @@ $$;
 -- 7. Função RPC: Validar Convite (validate_admin_invite)
 -- Usada pela página pública /admin/convite?token=... antes do cadastro
 -- =========================================================================
+DROP FUNCTION IF EXISTS public.validate_admin_invite(TEXT);
+DROP FUNCTION IF EXISTS public.validate_admin_invite;
 CREATE OR REPLACE FUNCTION public.validate_admin_invite(token_jwt TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -242,12 +246,13 @@ $$;
 
 -- =========================================================================
 -- 8. Função RPC: Aceitar e Consumir Convite de Forma Atômica (accept_admin_invite)
--- Cria ou atualiza a conta em auth.users e auth.identities, confirma o email,
--- grava a senha com bcrypt e define role 'admin'
 -- =========================================================================
+DROP FUNCTION IF EXISTS public.accept_admin_invite(TEXT, UUID, TEXT, TEXT);
+DROP FUNCTION IF EXISTS public.accept_admin_invite(TEXT, UUID, TEXT);
+DROP FUNCTION IF EXISTS public.accept_admin_invite;
 CREATE OR REPLACE FUNCTION public.accept_admin_invite(
     token_jwt TEXT,
-    target_user_id UUID DEFAULT NULL,
+    target_user_id UUID,
     target_full_name TEXT DEFAULT '',
     user_password TEXT DEFAULT NULL
 )
@@ -259,12 +264,10 @@ AS $$
 DECLARE
     v_invite RECORD;
     v_updated_rows INTEGER;
-    v_final_user_id UUID := target_user_id;
-    v_clean_email TEXT;
-    v_hashed_password TEXT := NULL;
+    v_hashed_password TEXT;
 BEGIN
-    IF token_jwt IS NULL THEN
-        RAISE EXCEPTION 'Parâmetros obrigatórios ausentes: token_jwt.';
+    IF token_jwt IS NULL OR target_user_id IS NULL THEN
+        RAISE EXCEPTION 'Parâmetros obrigatórios ausentes: token_jwt e target_user_id.';
     END IF;
 
     -- 1. Buscar convite com trava de concorrência (FOR UPDATE)
@@ -287,104 +290,15 @@ BEGIN
 
     IF v_invite.expires_at < timezone('utc'::text, now()) THEN
         UPDATE public.admin_invites SET status = 'expired' WHERE id = v_invite.id;
-        RAISE EXCEPTION 'Este convite expirou.';
+        RAISE EXCEPTION 'Este convite expirou. Solicite um novo link ao administrador.';
     END IF;
 
-    v_clean_email := lower(trim(v_invite.email));
-
-    -- 2. Gerar hash bcrypt da senha
-    IF user_password IS NOT NULL AND length(trim(user_password)) >= 6 THEN
-        BEGIN
-            v_hashed_password := extensions.crypt(user_password, extensions.gen_salt('bf', 10));
-        EXCEPTION WHEN OTHERS THEN
-            v_hashed_password := crypt(user_password, gen_salt('bf', 10));
-        END;
-    ELSE
-        RAISE EXCEPTION 'A senha informada deve conter no mínimo 6 caracteres.';
-    END IF;
-
-    -- 3. Identificar se o usuário já existe no auth.users
-    IF v_final_user_id IS NOT NULL THEN
-        IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = v_final_user_id) THEN
-            v_final_user_id := NULL;
-        END IF;
-    END IF;
-
-    IF v_final_user_id IS NULL THEN
-        SELECT id INTO v_final_user_id FROM auth.users WHERE lower(email) = v_clean_email LIMIT 1;
-    END IF;
-
-    -- 4. Criar ou Atualizar no auth.users
-    IF v_final_user_id IS NULL THEN
-        v_final_user_id := gen_random_uuid();
-
-        INSERT INTO auth.users (
-            instance_id,
-            id,
-            aud,
-            role,
-            email,
-            encrypted_password,
-            email_confirmed_at,
-            raw_app_meta_data,
-            raw_user_meta_data,
-            created_at,
-            updated_at
-        ) VALUES (
-            '00000000-0000-0000-0000-000000000000',
-            v_final_user_id,
-            'authenticated',
-            'authenticated',
-            v_clean_email,
-            v_hashed_password,
-            timezone('utc'::text, now()),
-            '{"provider":"email","providers":["email"]}'::jsonb,
-            jsonb_build_object('full_name', coalesce(target_full_name, ''), 'email', v_clean_email, 'email_verified', true),
-            timezone('utc'::text, now()),
-            timezone('utc'::text, now())
-        );
-    ELSE
-        UPDATE auth.users
-        SET 
-            encrypted_password = v_hashed_password,
-            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
-            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
-            raw_app_meta_data = '{"provider":"email","providers":["email"]}'::jsonb,
-            raw_user_meta_data = jsonb_build_object('full_name', coalesce(target_full_name, ''), 'email', v_clean_email, 'email_verified', true),
-            aud = 'authenticated',
-            role = 'authenticated',
-            updated_at = timezone('utc'::text, now())
-        WHERE id = v_final_user_id;
-    END IF;
-
-    -- 5. Garantir consistência na tabela auth.identities do Supabase GoTrue
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'identities') THEN
-        BEGIN
-            DELETE FROM auth.identities WHERE user_id = v_final_user_id;
-            
-            IF EXISTS (
-                SELECT 1 FROM information_schema.columns 
-                WHERE table_schema = 'auth' AND table_name = 'identities' AND column_name = 'provider_id'
-            ) THEN
-                EXECUTE 'INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at) 
-                         VALUES ($1, $2, $3, ''email'', $1, now(), now(), now())'
-                USING v_final_user_id::text, v_final_user_id, jsonb_build_object('sub', v_final_user_id::text, 'email', v_clean_email, 'email_verified', true, 'phone_verified', false);
-            ELSE
-                EXECUTE 'INSERT INTO auth.identities (id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at) 
-                         VALUES ($1, $2, $3, ''email'', now(), now(), now())'
-                USING v_final_user_id::text, v_final_user_id, jsonb_build_object('sub', v_final_user_id::text, 'email', v_clean_email, 'email_verified', true, 'phone_verified', false);
-            END IF;
-        EXCEPTION WHEN OTHERS THEN
-            NULL;
-        END;
-    END IF;
-
-    -- 6. Consumir o token de convite de forma atômica (Uso Único)
+    -- 2. Consumir o token de convite de forma atômica (Uso Único)
     UPDATE public.admin_invites
     SET 
         status = 'used',
         used_at = timezone('utc'::text, now()),
-        used_by = v_final_user_id
+        used_by = target_user_id
     WHERE id = v_invite.id AND status = 'pending';
 
     GET DIAGNOSTICS v_updated_rows = ROW_COUNT;
@@ -392,11 +306,37 @@ BEGIN
         RAISE EXCEPTION 'Falha ao processar convite: o token já foi consumido por outra requisição.';
     END IF;
 
-    -- 7. Atualizar ou Inserir o perfil do usuário como 'admin'
+    -- 3. Confirmar o e-mail em auth.users e sincronizar senha
+    IF user_password IS NOT NULL AND length(trim(user_password)) >= 6 THEN
+        BEGIN
+            v_hashed_password := extensions.crypt(user_password, extensions.gen_salt('bf', 10));
+        EXCEPTION WHEN OTHERS THEN
+            v_hashed_password := crypt(user_password, gen_salt('bf', 10));
+        END;
+
+        UPDATE auth.users
+        SET 
+            encrypted_password = v_hashed_password,
+            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
+            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
+            raw_user_meta_data = jsonb_build_object('full_name', coalesce(target_full_name, '')),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = target_user_id;
+    ELSE
+        UPDATE auth.users
+        SET 
+            email_confirmed_at = coalesce(email_confirmed_at, timezone('utc'::text, now())),
+            confirmed_at = coalesce(confirmed_at, timezone('utc'::text, now())),
+            raw_user_meta_data = jsonb_build_object('full_name', coalesce(target_full_name, '')),
+            updated_at = timezone('utc'::text, now())
+        WHERE id = target_user_id;
+    END IF;
+
+    -- 4. Atualizar ou Inserir o perfil do usuário como 'admin'
     INSERT INTO public.profiles (id, email, full_name, role, created_at)
     VALUES (
-        v_final_user_id,
-        v_clean_email,
+        target_user_id,
+        v_invite.email,
         coalesce(target_full_name, ''),
         'admin',
         timezone('utc'::text, now())
@@ -411,15 +351,15 @@ BEGIN
     -- Sincronizar tabela legado user_roles caso exista
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_roles') THEN
         INSERT INTO public.user_roles (user_id, role)
-        VALUES (v_final_user_id, 'admin')
+        VALUES (target_user_id, 'admin')
         ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
     END IF;
 
     RETURN jsonb_build_object(
         'success', true,
         'message', 'Convite consumido com sucesso. Conta de administrador ativada!',
-        'user_id', v_final_user_id,
-        'email', v_clean_email
+        'user_id', target_user_id,
+        'email', v_invite.email
     );
 END;
 $$;
@@ -427,6 +367,8 @@ $$;
 -- =========================================================================
 -- 9. Função RPC: Revogar Convite (revoke_admin_invite)
 -- =========================================================================
+DROP FUNCTION IF EXISTS public.revoke_admin_invite(UUID);
+DROP FUNCTION IF EXISTS public.revoke_admin_invite;
 CREATE OR REPLACE FUNCTION public.revoke_admin_invite(invite_id UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
