@@ -45,6 +45,7 @@ export function ClientArea() {
                     onChange={(e) =>
                       setCredentials({ ...credentials, username: e.target.value })
                     }
+                    autoComplete="username"
                     placeholder="Digite seu usuário"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -67,6 +68,7 @@ export function ClientArea() {
                     onChange={(e) =>
                       setCredentials({ ...credentials, password: e.target.value })
                     }
+                    autoComplete="current-password"
                     placeholder="Digite sua senha"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
