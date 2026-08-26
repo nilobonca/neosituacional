@@ -95,30 +95,12 @@ export function AdminAcceptInvite() {
     try {
       setSubmitting(true);
 
-      // 1. Tentar criar o usuário pelo Supabase Auth (se não existir)
-      let userId: string | null = null;
-      try {
-        const { data: signUpData } = await supabase.auth.signUp({
-          email: inviteEmail,
-          password: password,
-          options: {
-            data: {
-              full_name: fullName.trim()
-            }
-          }
-        });
-
-        if (signUpData?.user?.id) {
-          userId = signUpData.user.id;
-        }
-      } catch (clientAuthErr) {
-        console.warn("SignUp no cliente falhou, criando diretamente via RPC:", clientAuthErr);
-      }
-
-      // 2. Chamar RPC atômica que consome o convite, cria/atualiza o usuário, confirma o e-mail, grava a senha com bcrypt e eleva para 'admin'
+      // 1. Chamar RPC atômica no banco: cria/atualiza em auth.users e auth.identities,
+      //    grava a senha com hash bcrypt, confirma o e-mail e atribui role 'admin'.
+      //    (Não usa o endpoint de signUp do cliente, evitando o limite de taxa 429)
       const { data: acceptData, error: acceptError } = await supabase.rpc("accept_admin_invite", {
         token_jwt: token,
-        target_user_id: userId,
+        target_user_id: null,
         target_full_name: fullName.trim(),
         user_password: password
       });
@@ -127,7 +109,7 @@ export function AdminAcceptInvite() {
         throw acceptError;
       }
 
-      // 3. Fazer login imediato com a senha configurada
+      // 2. Autenticar diretamente com a senha recém-criada
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: inviteEmail,
         password: password
