@@ -30,7 +30,7 @@ export function CondoLayout() {
         .eq("id", session.user.id)
         .single();
 
-      if (!roleData || roleData.role !== "sindico") {
+      if (!roleData || (roleData.role !== "sindico" && roleData.role !== "dev" && roleData.role !== "admin")) {
         await supabase.auth.signOut();
         navigate("/area-cliente/login");
       } else {
