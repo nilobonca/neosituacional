@@ -16,7 +16,9 @@ import {
   Truck,
   Building2,
   Globe,
-  UserPlus
+  UserPlus,
+  Terminal,
+  Sparkles
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -25,6 +27,8 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string>("");
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -39,10 +43,11 @@ export function AdminLayout() {
         .eq("id", session.user.id)
         .single();
 
-      if (!roleData || roleData.role !== "admin") {
+      if (!roleData || (roleData.role !== "admin" && roleData.role !== "dev")) {
         await supabase.auth.signOut();
         navigate("/admin/login");
       } else {
+        setUserRole(roleData.role);
         setIsLoading(false);
       }
     };
@@ -74,7 +79,7 @@ export function AdminLayout() {
     );
   }
 
-  const menuItems = [
+  const baseMenuItems = [
     { path: "/admin", icon: <LayoutDashboard size={20} />, label: "Dashboard", exact: true },
     { path: "/admin/careers", icon: <Briefcase size={20} />, label: "Currículos" },
     { path: "/admin/proposals", icon: <FileSignature size={20} />, label: "Propostas" },
@@ -87,6 +92,17 @@ export function AdminLayout() {
     { path: "/admin/invites", icon: <UserPlus size={20} />, label: "Convites de Admin" },
     { path: "/admin/settings", icon: <Settings size={20} />, label: "Configurações" },
   ];
+
+  const devMenuItems = userRole === "dev" ? [
+    { 
+      path: "/admin/dev-users", 
+      icon: <Terminal size={20} className="text-purple-400" />, 
+      label: "Controle DEV (Senhas)",
+      isDev: true
+    }
+  ] : [];
+
+  const menuItems = [...devMenuItems, ...baseMenuItems];
 
   const isActive = (path: string, exact?: boolean) => {
     if (exact) return location.pathname === path;
@@ -125,21 +141,33 @@ export function AdminLayout() {
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 px-3 mt-4">
             Menu Principal
           </div>
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                isActive(item.path, item.exact)
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
-              }`}
-            >
-              {item.icon}
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const active = isActive(item.path, item.exact);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => window.innerWidth < 768 && setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                  item.isDev
+                    ? active
+                      ? "bg-purple-600 text-white font-semibold shadow-md border border-purple-400/30"
+                      : "text-purple-300 bg-purple-950/40 hover:bg-purple-900/60 hover:text-white border border-purple-800/40"
+                    : active
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                {item.icon}
+                <span className="font-medium flex-1">{item.label}</span>
+                {item.isDev && (
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 bg-purple-400/20 text-purple-200 rounded">
+                    DEV
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-slate-800 mt-auto flex flex-col gap-2">

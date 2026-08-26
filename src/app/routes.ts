@@ -28,6 +28,7 @@ import { AdminSuppliers } from "./pages/AdminSuppliers";
 import { AdminLogin } from "./pages/AdminLogin";
 import { AdminInvites } from "./pages/AdminInvites";
 import { AdminAcceptInvite } from "./pages/AdminAcceptInvite";
+import { AdminDevUsers } from "./pages/AdminDevUsers";
 
 import { CondoLogin } from "./pages/CondoLogin";
 import { CondoRegister } from "./pages/CondoRegister";
@@ -88,6 +89,7 @@ export const router = createBrowserRouter([
       { path: "proposals", Component: AdminProposals },
       { path: "suppliers", Component: AdminSuppliers },
       { path: "invites", Component: AdminInvites },
+      { path: "dev-users", Component: AdminDevUsers },
       { path: "*", Component: NotFound }
     ]
   },
