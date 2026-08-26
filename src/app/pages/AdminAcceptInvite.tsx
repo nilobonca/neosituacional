@@ -95,46 +95,11 @@ export function AdminAcceptInvite() {
     try {
       setSubmitting(true);
 
-      // 1. Cadastrar o usuário no Supabase Auth via GoTrue para garantir o schema perfeito
-      let userId: string | null = null;
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: inviteEmail,
-        password: password,
-        options: {
-          data: {
-            full_name: fullName.trim()
-          }
-        }
-      });
-
-      if (signUpError) {
-        // Se a conta já existe, tenta recuperar o ID via sessão
-        if (signUpError.message?.toLowerCase().includes("already registered") || signUpError.status === 400) {
-          const { data: signInData } = await supabase.auth.signInWithPassword({
-            email: inviteEmail,
-            password: password
-          });
-          userId = signInData?.user?.id || null;
-        } else {
-          throw signUpError;
-        }
-      } else {
-        userId = signUpData?.user?.id || null;
-      }
-
-      if (!userId) {
-        const { data: sessionData } = await supabase.auth.getSession();
-        userId = sessionData?.session?.user?.id || null;
-      }
-
-      if (!userId) {
-        throw new Error("Não foi possível gerar a identificação do usuário. Tente novamente.");
-      }
-
-      // 2. Chamar RPC atômica que consome o convite, confirma o e-mail no Auth e eleva a role para 'admin'
-      const { error: acceptError } = await supabase.rpc("accept_admin_invite", {
+      // 1. Chamar RPC atômica que cria a conta diretamente no banco, confirma o e-mail,
+      //    grava a senha com hash bcrypt e eleva a role para 'admin'.
+      //    (100% imune a limites de taxa de e-mail / 429)
+      const { data: acceptData, error: acceptError } = await supabase.rpc("accept_admin_invite", {
         token_jwt: token,
-        target_user_id: userId,
         target_full_name: fullName.trim(),
         user_password: password
       });
@@ -143,7 +108,7 @@ export function AdminAcceptInvite() {
         throw acceptError;
       }
 
-      // 3. Fazer login com a conta ativada
+      // 2. Fazer login com a conta ativada
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: inviteEmail,
         password: password
