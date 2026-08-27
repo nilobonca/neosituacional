@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/api/supabase/(.*)",
+      "destination": "/api/supabase?path=$1"
+    },
+    {
+      "source": "/api/supabase",
+      "destination": "/api/supabase"
+    },
+    {
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
