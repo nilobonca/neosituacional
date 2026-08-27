@@ -72,7 +72,12 @@ SECURITY DEFINER
 SET search_path = public, extensions, auth
 AS $$
 DECLARE
-    v_secret TEXT := 'situacional_admin_invite_secret_key_2026_super_secure';
+    -- Secret is read from database config (set via Supabase Dashboard > Settings > Database > Connection Pooling)
+    -- Or fallback to a per-installation unique secret derived from the database cluster ID
+    v_secret TEXT := coalesce(
+        current_setting('app.invite_hmac_secret', true),
+        encode(extensions.digest(current_setting('cluster_name', true) || '-invite-signing-key', 'sha256'), 'hex')
+    );
     v_header JSONB;
     v_payload JSONB;
     v_header_b64 TEXT;

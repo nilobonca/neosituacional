@@ -50,7 +50,7 @@ export function AdminBlogList() {
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
             <p>Erro ao carregar posts: {error}</p>
-            <p className="text-sm mt-2">Você configurou as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no arquivo .env e criou a tabela no Supabase?</p>
+            <p className="text-sm mt-2">Você configurou as variáveis SUPABASE_URL e SUPABASE_ANON_KEY no painel da Vercel e criou a tabela no Supabase?</p>
           </div>
         )}
 

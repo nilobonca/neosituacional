@@ -5,8 +5,12 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL || 'https://sdjbkstqujohtxtdtuuk.supabase.co'
-  const supabaseKey = env.SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY || ''
+  const supabaseUrl = env.SUPABASE_URL || ''
+  const supabaseKey = env.SUPABASE_ANON_KEY || ''
+
+  if (!supabaseUrl && mode === 'development') {
+    console.warn('\x1b[33m⚠ SUPABASE_URL not found in .env — dev proxy will not work.\x1b[0m')
+  }
 
   return {
     plugins: [
